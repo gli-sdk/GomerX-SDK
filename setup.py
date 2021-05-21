@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages
 import os
 import sys
+import platform
 
 if sys.version_info < (3, 6, 5):
     sys.exit('GomerX SDK requires Python 3.6.5 or later')
@@ -17,6 +18,11 @@ def fetch_version():
 
 ver = fetch_version()['__version__']
 
+data_files = []
+if platform.system() == "Windows":
+    data_files = [('lib', ['lib/libglproto64.dll'])]
+
+
 setup(
     name='gomerx',
     version=ver,
@@ -31,5 +37,6 @@ setup(
     install_requires=[
         'numpy >= 1.18.1',
         'opencv-python >= 4.2.0'
-    ]
+    ],
+    data_files=data_files
 )
