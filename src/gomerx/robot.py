@@ -8,23 +8,16 @@ from . import gripper
 from . import led
 from . import protocol
 from . import servo
-from . import vision
 from . import client
 from . import config
 from . import logger
 
 __all__ = ['Robot']
 
-MODULE_ARM = 'Arm'
-MODULE_CAMERA = 'Camera'
-MODULE_CHASSIS = 'Chassis'
-MODULE_GRIPPER = 'Gripper'
-MODULE_LED = 'Led'
-MODULE_SERVO = 'Servo'
-MODULE_VISION = 'Vision'
-
 
 class Robot(object):
+    """ GomerX 机器人 """
+
     def __init__(self, name: str):
         self._name = name
         self._conn = connection.Connection()
@@ -32,17 +25,13 @@ class Robot(object):
         self._modules = {}
         self._client = client.Client(self._conn, self._name)
         self._action_dispatcher = action.ActionDispatcher(self._client)
-        # self._dds = dds.Subscriber(self)
         self._arm = arm.Arm(self)
         self._camera = camera.Camera(self)
         self._chassis = chassis.Chassis(self)
         self._gripper = gripper.Gripper(self)
         self._led = led.Led(self)
         self._servo = servo.Servo(self)
-        self._vision = vision.Vision(self)
         self._skill = skill.Skill(self)
-
-        # self._dds.start()
         self._client.start()
 
     def __del__(self):
@@ -54,22 +43,27 @@ class Robot(object):
 
     @property
     def camera(self):
+        """ 获取相机对象 """
         return self._camera
 
     @property
     def chassis(self):
+        """ 获取车体底盘对象 """
         return self._chassis
 
     @property
     def gripper(self):
+        """ 获取机械手对象 """
         return self._gripper
 
     @property
     def arm(self):
+        """ 获取机械臂对象 """
         return self._arm
 
     @property
     def skill(self):
+        """ 获取技能对象 """
         return self._skill
 
     @property
@@ -77,11 +71,8 @@ class Robot(object):
         return self._led
 
     @property
-    def vision(self):
-        return self._vision
-
-    @property
     def servo(self):
+        """ 获取舵机对象 """
         return self._servo
 
     @property
@@ -93,8 +84,8 @@ class Robot(object):
         return self._name
 
     def close(self):
+        """ 关闭机器人连接 """
         self._client.stop()
-        # self._dds.stop()
 
     def get_version(self):
         proto = protocol.ProtoGetHardInfo()
@@ -110,6 +101,11 @@ class Robot(object):
             return None
 
     def get_sn(self):
+        """ 获取机器人序列号SN
+
+        :return: SN字符串，如：GomerX2019010100A
+        :rtype: str | None
+        """
         proto = protocol.ProtoGetHardInfo()
         msg = protocol.Message(proto)
         try:
@@ -123,6 +119,7 @@ class Robot(object):
             return None
 
     def get_battery(self):
+        """ 获取机器人电量 """
         proto = protocol.ProtoGetHardInfo()
         msg = protocol.Message(proto)
         try:

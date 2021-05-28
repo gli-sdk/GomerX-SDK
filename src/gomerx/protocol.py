@@ -288,40 +288,6 @@ class ProtoGripperStatus(ProtoData):
         return super().unpack_resp(buf)
 
 
-class ProtoVisionEnable(ProtoData):
-    _cmdid = 5500
-
-    def __init__(self, evt):
-        self._evt = evt
-
-    def pack_req(self):
-        self.__class__._cmdprm = [self._evt]
-        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
-        return data
-
-    def unpack_resp(self, buf):
-        info = json.loads(buf)
-        self._code = info['code']
-        return True
-
-
-class ProtoVisionDisable(ProtoData):
-    _cmdid = 5501
-
-    def __init__(self, evt):
-        self._evt = evt
-
-    def pack_req(self):
-        self.__class__._cmdprm = [self._evt]
-        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
-        return data
-
-    def unpack_resp(self, buf):
-        info = json.loads(buf)
-        self._code = info['code']
-        return True
-
-
 class ProtoPatternDet(ProtoData):
     _cmdid = 5110
 
