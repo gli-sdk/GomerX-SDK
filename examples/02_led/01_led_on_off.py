@@ -12,3 +12,5 @@ if __name__ == '__main__':
     time.sleep(3)
     color = (0, 0, 0)
     my_led.set_led(color, led.EFFECT_OFF)
+
+    my_robot.close()

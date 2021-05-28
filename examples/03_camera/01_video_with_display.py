@@ -9,3 +9,4 @@ if __name__ == '__main__':
     my_camera.start_video_stream(display=True)
     time.sleep(5)
     my_camera.stop_video_stream()
+    my_robot.close()

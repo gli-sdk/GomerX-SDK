@@ -7,3 +7,4 @@ if __name__ == '__main__':
     my_servo = my_robot.servo
     my_servo.move_to(0, 180)
     my_servo.move_to(1, 70)
+    my_robot.close()

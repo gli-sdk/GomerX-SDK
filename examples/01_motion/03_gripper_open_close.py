@@ -6,3 +6,4 @@ if __name__ == '__main__':
     my_gripper = my_robot.gripper
     my_gripper.close()
     my_gripper.open()
+    my_robot.close()
