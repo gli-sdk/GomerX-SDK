@@ -1,5 +1,6 @@
 from . import connection
 from . import action
+from . import skill
 from . import arm
 from . import camera
 from . import chassis
@@ -11,7 +12,6 @@ from . import vision
 from . import client
 from . import config
 from . import logger
-from . import dds
 
 __all__ = ['Robot']
 
@@ -24,27 +24,29 @@ MODULE_SERVO = 'Servo'
 MODULE_VISION = 'Vision'
 
 
-class RobotBase(object):
-    def __init__(self, client=None, conf=config.gomerx_conf):
-        self._client = client
-        self._conf = conf
-        self._modules = {}
-
-
-class Robot(RobotBase):
+class Robot(object):
     def __init__(self, name: str):
         self._name = name
         self._conn = connection.Connection()
-        super().__init__(client.Client(self._conn, self._name), config.gomerx_conf)
+        self._conf = config.gomerx_conf
+        self._modules = {}
+        self._client = client.Client(self._conn, self._name)
         self._action_dispatcher = action.ActionDispatcher(self._client)
+        # self._dds = dds.Subscriber(self)
+        self._arm = arm.Arm(self)
+        self._camera = camera.Camera(self)
+        self._chassis = chassis.Chassis(self)
+        self._gripper = gripper.Gripper(self)
+        self._led = led.Led(self)
+        self._servo = servo.Servo(self)
+        self._vision = vision.Vision(self)
+        self._skill = skill.Skill(self)
 
-        self._scan_modules()
+        # self._dds.start()
         self._client.start()
 
     def __del__(self):
-        self._client.stop()
-        if self._client is not None:
-            self._client.stop()
+        self.close()
 
     @property
     def client(self):
@@ -52,31 +54,35 @@ class Robot(RobotBase):
 
     @property
     def camera(self):
-        return self.get_module(MODULE_CAMERA)
+        return self._camera
 
     @property
     def chassis(self):
-        return self.get_module(MODULE_CHASSIS)
+        return self._chassis
 
     @property
     def gripper(self):
-        return self.get_module(MODULE_GRIPPER)
+        return self._gripper
 
     @property
     def arm(self):
-        return self.get_module(MODULE_ARM)
+        return self._arm
+
+    @property
+    def skill(self):
+        return self._skill
 
     @property
     def led(self):
-        return self.get_module(MODULE_LED)
+        return self._led
 
     @property
     def vision(self):
-        return self.get_module(MODULE_VISION)
+        return self._vision
 
     @property
     def servo(self):
-        return self.get_module(MODULE_SERVO)
+        return self._servo
 
     @property
     def action_dispatcher(self):
@@ -86,31 +92,9 @@ class Robot(RobotBase):
     def name(self):
         return self._name
 
-    @property
-    def dds(self):
-        return self._dds
-
-    def _scan_modules(self):
-        _arm = arm.Arm(self)
-        _camera = camera.Camera(self)
-        _chassis = chassis.Chassis(self)
-        _gripper = gripper.Gripper(self)
-        _led = led.Led(self)
-        _servo = servo.Servo(self)
-        _vision = vision.Vision(self)
-        _dds = dds.Subscriber(self)
-        _dds.start()
-
-        self._modules[_arm.__class__.__name__] = _arm
-        self._modules[_camera.__class__.__name__] = _camera
-        self._modules[_chassis.__class__.__name__] = _chassis
-        self._modules[_gripper.__class__.__name__] = _gripper
-        self._modules[_led.__class__.__name__] = _led
-        self._modules[_servo.__class__.__name__] = _servo
-        self._modules[_vision.__class__.__name__] = _vision
-
-    def get_module(self, name: str):
-        return self._modules[name]
+    def close(self):
+        self._client.stop()
+        # self._dds.stop()
 
     def get_version(self):
         proto = protocol.ProtoGetHardInfo()

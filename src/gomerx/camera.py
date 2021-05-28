@@ -13,6 +13,9 @@ class Camera(object):
         self._yuv = None
         self._video_enable = False
 
+    def __del__(self):
+        self.stop_video_stream()
+
     def start_video_stream(self, display=True):
         self._conn.open_video()
         self._video_enable = True
@@ -26,6 +29,7 @@ class Camera(object):
             self._conn.close_video()
             self._video_enable = False
             cv.destroyAllWindows()
+            self._video_enable = False
 
     def read_cv_image(self):
         if self._yuv:

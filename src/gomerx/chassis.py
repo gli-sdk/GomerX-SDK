@@ -7,7 +7,6 @@ from . import module
 
 class ChassisAction(action.Action):
     _action_proto_cls = protocol.ProtoChassisMove
-    _push_proto_cls = protocol.ProtoChassisMove
 
     def __init__(self, x=0, y=0, a=0, **kw):
         super().__init__(**kw)
@@ -21,11 +20,6 @@ class ChassisAction(action.Action):
         proto._y = self._y
         proto._a = self._a
         return proto
-
-    def update_from_push(self, proto: protocol.ProtoData):
-        if proto.__class__ is not self._push_proto_cls:
-            return
-        self._update_action_state(proto._code)
 
 
 class Chassis(module.Module):

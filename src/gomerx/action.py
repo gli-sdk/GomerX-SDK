@@ -40,6 +40,7 @@ class Action(metaclass=_AutoRegisterAction):
         super().__init__(**kw)
         self._action_id = -1
         self._state = ACTION_IDLE
+        self._data = None
 
         self._event = threading.Event()
         self._obj = None
@@ -87,22 +88,20 @@ class Action(metaclass=_AutoRegisterAction):
     def make_action_key(self):
         return str(self._action_proto_cls._cmdid) + '-' + str(self._action_id)
 
-    def wait_for_completed(self, timeout=None):
+    def wait_for_completed(self, timeout=5):
         if self._event.is_set() and self.is_completed:
-            return True
+            if self.has_succeeded:
+                return True
+            else:
+                return False
         self._event.wait(timeout)
         if not self._event.is_set():
             self._event = ACTION_FAILED
             return False
-        return True
-
-    def _update_action_state(self, proto_state):
-        if proto_state == 100:
-            self._change_to_state(ACTION_RUNNING)
-        elif proto_state == 101:
-            self._change_to_state(ACTION_FAILED)
-        elif proto_state == 102:
-            self._change_to_state(ACTION_SUCCEEDED)
+        if self.has_succeeded:
+            return True
+        else:
+            return False
 
     def encode(self):
         raise NotImplementedError()
@@ -157,12 +156,17 @@ class ActionDispatcher(object):
         self._in_progress_mutex.release()
 
         if found_proto:
+            if proto._data is not None:
+                action._data = proto._data
             if proto._code == 100:
                 action._change_to_state(ACTION_RUNNING)
             elif proto._code == 101:
                 action._change_to_state(ACTION_FAILED)
             elif proto._code == 102:
-                action._change_to_state(ACTION_SUCCEEDED)
+                if proto._result == 100:
+                    action._change_to_state(ACTION_SUCCEEDED)
+                else:
+                    action._change_to_state(ACTION_FAILED)
 
     def get_msg_by_action(self, action: Action):
         proto = action.encode()

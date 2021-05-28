@@ -19,6 +19,7 @@ class ProtoData(object):
     _cmdtype = SDK_MSG_TYPE_REQ
     _cmdid = None
     _cmdprm = None
+    _data = None
 
     def __init__(self, **kwargs):
         self._buf = None
@@ -70,6 +71,7 @@ class Message(MessageBase):
             data = self._proto.pack_req()
             data.update({"seq": self._seq_id, "msgtype": self._need_ack})
             data_buf = json.dumps(data)
+            print(data_buf)
         self._buf = data_buf
         return self._buf
 
@@ -91,7 +93,10 @@ def decode_msg(buff: str):
     msg._len = len(msg._buf)
     msg_dict = json.loads(msg._buf)
     msg._is_ack = True
-    msg._seq_id = msg_dict['seq']
+    if 'num' in msg_dict:
+        msg._seq_id = msg_dict['num']
+    else:
+        msg._seq_id = msg_dict['seq']
     if 'hard' in msg_dict:
         msg._proto = ProtoGetHardInfo()
     elif 'item' in msg_dict:
@@ -104,6 +109,20 @@ def decode_msg(buff: str):
             msg._proto = ProtoServoControl()
         elif item == 5020:
             msg._proto = ProtoGripperCtrl()
+        elif item == 5100:
+            msg._proto = ProtoFaceDet()
+        elif item == 5110:
+            msg._proto = ProtoPatternDet()
+        elif item == 5120:
+            msg._proto = ProtoQrCodeDet()
+        elif item == 5140:
+            msg._proto = ProtoPatternTrack()
+        elif item == 5150:
+            msg._proto = ProtoColorDet()
+        elif item == 5160:
+            msg._proto = ProtoLineDet()
+        elif item == 5170:
+            msg._proto = ProtoLineTrack()
         elif item == 5300:
             msg._proto = ProtoSetLed()
     return msg
@@ -269,30 +288,180 @@ class ProtoGripperStatus(ProtoData):
         return super().unpack_resp(buf)
 
 
-class ProtoVisionDetectInfo(ProtoData):
+class ProtoVisionEnable(ProtoData):
+    _cmdid = 5500
+
+    def __init__(self, evt):
+        self._evt = evt
+
+    def pack_req(self):
+        self.__class__._cmdprm = [self._evt]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        return True
+
+
+class ProtoVisionDisable(ProtoData):
+    _cmdid = 5501
+
+    def __init__(self, evt):
+        self._evt = evt
+
+    def pack_req(self):
+        self.__class__._cmdprm = [self._evt]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        return True
+
+
+class ProtoPatternDet(ProtoData):
+    _cmdid = 5110
 
     def __init__(self):
-        self._info = []
+        self._timeout = 1
+        self._action_id = 0
+        self._id = 'A'
+        self._result = 101
+
+    def pack_req(self):
+        self.__class__._cmdprm = [self._timeout, ord(self._id)]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        return True
+
+
+class ProtoFaceDet(ProtoData):
+    _cmdid = 5100
+
+    def __init__(self):
+        self._timeout = 1
+        self._action_id = 0
+        self._id = -1
+        self._result = 101
+
+    def pack_req(self):
+        self.__class__._cmdprm = [self._timeout, self._id]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        return True
+
+
+class ProtoPatternTrack(ProtoData):
+    _cmdid = 5140
+
+    def __init__(self):
+        self._action_id = 0
+        self._id = 'A'
+        self._x = 0
+        self._y = 13
+        self._result = 101
+
+    def pack_req(self):
+        self.__class__._cmdprm = [ord(self._id), self._x, self._y]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        return True
+
+
+class ProtoLineTrack(ProtoData):
+    _cmdid = 5170
+
+    def __init__(self):
+        self._action_id = 0
+        self._id = 0
+        self._result = 101
+
+    def pack_req(self):
+        self.__class__._cmdprm = [self._id]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        return True
+
+
+class ProtoColorDet(ProtoData):
+    _cmdid = 5150
+
+    def __init__(self):
+        self._timeout = 1
+        self._action_id = 0
+        self._hsv_low = (0, 0, 0)
+        self._hsv_high = (180, 255, 255)
+        self._result = 101
+        self._data = None
+
+    def pack_req(self):
+        self.__class__._cmdprm = [self._timeout, self._hsv_low[0], self._hsv_high[0],
+                                  self._hsv_low[1], self._hsv_high[1], self._hsv_low[2], self._hsv_high[2]]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        if 'dataint' in info:
+            self._data = info['dataint']
+        return True
+
+
+class ProtoQrCodeDet(ProtoData):
+    _cmdid = 5120
+
+    def __init__(self):
+        self._timeout = 1
+        self._result = 101
+        self._data = None
+
+    def pack_req(self):
+        self.__class__._cmdprm = [self._timeout]
+        data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        if 'data' in info:
+            self._data = info['data']
+        return True
+
+
+class ProtoLineDet(ProtoColorDet):
+    _cmdid = 5160
+
+    def __init__(self):
+        super().__init__()
 
     def pack_req(self):
         return super().pack_req()
 
-    def unpack_req(self, buf):
-        return super().unpack_req(buf)
-
-
-class ProtoVisionDetectEnable(ProtoData):
-    pass
-
-
-class ProtoPushPeriodMsg(ProtoData):
-
-    def __init__(self):
-        self._sub_mode = 0
-        self._data_buf = None
-
-    def pack_req(self):
-        return super().pack_req()
-
-    def unpack_req(self, buf):
-        return super().unpack_req(buf)
+    def unpack_resp(self, buf):
+        return super().unpack_resp(buf)

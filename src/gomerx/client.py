@@ -115,12 +115,14 @@ class Client(object):
             ident = self._make_ack_identify(msg)
             self._wait_ack_mutex.acquire()
             if ident in self._wait_ack_list.keys():
+                print("ident in keys")
                 for i, evt in enumerate(self._event_list):
                     if evt._ident == ident and evt._valid:
                         self._wait_ack_list[ident] = msg
                         evt._event.set()
             else:
-                print("not in keys")
+                pass
+                # print("not in keys: ", self._wait_ack_list.keys())
             self._wait_ack_mutex.release()
 
     def _dispatch_to_callback(self, msg):
@@ -195,6 +197,7 @@ class Client(object):
 
             return resp_msg
         else:
+            print("else send msg")
             self.send_msg(msg)
 
     def send_async_msg(self, msg: protocol.Message):

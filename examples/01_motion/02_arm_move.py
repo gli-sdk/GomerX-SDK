@@ -7,3 +7,4 @@ if __name__ == '__main__':
     my_arm = my_robot.arm
     my_arm.move_to(12, 10)
     my_arm.move_to(12, 15)
+    my_robot.close()
