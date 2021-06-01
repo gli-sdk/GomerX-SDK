@@ -2,9 +2,7 @@ import numpy as np
 import cv2 as cv
 import threading
 
-from numpy.lib.shape_base import dsplit
 from . import connection
-from . import robot
 
 
 class Camera(object):

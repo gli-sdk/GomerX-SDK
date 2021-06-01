@@ -1,4 +1,3 @@
-from queue import Queue
 import threading
 from . import connection
 from . import protocol

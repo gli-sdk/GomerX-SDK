@@ -48,4 +48,4 @@ class Arm(module.Module):
         :return: 机械臂回中是否完成, 完成返回 True, 否则返回 False
         :rtype: bool
         """
-        return self.move_to(0, 0, wait_for_complete)
+        return self.move_to(12, 15, wait_for_complete)

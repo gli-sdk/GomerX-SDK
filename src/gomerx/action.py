@@ -1,6 +1,7 @@
 import threading
 from . import protocol
 from . import logger
+from . import client
 
 __all__ = ['Action, ActionDispatcher']
 
@@ -114,7 +115,7 @@ class Action(metaclass=_AutoRegisterAction):
 
 
 class ActionDispatcher(object):
-    def __init__(self, client=None):
+    def __init__(self, client: client.Client):
         self._client = client
         self._in_progress_mutex = threading.Lock()
         self._in_progress = {}
@@ -137,7 +138,7 @@ class ActionDispatcher(object):
             self._in_progress_mutex.release()
 
     @classmethod
-    def _on_recv(cls, self, msg):
+    def _on_recv(cls, self, msg: protocol.Message):
         proto = msg.get_proto()
         if proto is None:
             return
