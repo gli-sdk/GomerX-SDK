@@ -1,10 +1,10 @@
 ================
-Robot 模块
+Led 模块
 ================
 
 
-.. autoclass:: gomerx.robot.Robot
-   :members: arm, skill
+.. autoclass:: gomerx.led.Led
+   :members: 
    :show-inheritance:
    :exclude-members:
    :inherited-members:

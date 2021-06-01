@@ -1,10 +1,10 @@
 ================
-Robot 模块
+Arm 模块
 ================
 
 
-.. autoclass:: gomerx.robot.Robot
-   :members: arm, skill
+.. autoclass:: gomerx.arm.Arm
+   :members: 
    :show-inheritance:
    :exclude-members:
    :inherited-members:

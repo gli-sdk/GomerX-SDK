@@ -25,6 +25,14 @@ class Servo(module.Module):
         self._action_dispatcher = robot.action_dispatcher
 
     def move_to(self, id=0, angle=0, wait_for_complete=True):
+        """舵机移动到绝对位置
+
+        :param int id: [0, 1], 0:左侧舵机, 1:右侧舵机
+        :param int angle: [0 ~ 180], 舵机旋转角度, 单位(°)
+        :param bool wait_for_complete: 是否等待执行完成
+        :return: 舵机是否移到绝对位置, 移动成功返回 True, 否则返回 False
+        :rtype: bool
+        """
         action = ServoAction(id, angle)
         self._action_dispatcher.send_action(action)
         if wait_for_complete:
@@ -32,6 +40,12 @@ class Servo(module.Module):
         return True
 
     def get_angle(self, id=0):
+        """获取舵机角度值
+
+        :param int id: [0, 1], 0:左侧舵机, 1:右侧舵机
+        :return: 舵机角度
+        :rtype: int
+        """
         proto = protocol.ProtoServoGetAngle()
         proto._id = id
         msg = protocol.Message(proto)

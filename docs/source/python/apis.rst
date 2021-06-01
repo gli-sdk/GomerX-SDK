@@ -4,6 +4,11 @@ Python API
 
 .. toctree::
     :maxdepth: 1
-    :caption: 机器人
 
     robot.rst
+    arm.rst
+    camera.rst
+    chassis.rst
+    gripper.rst
+    led.rst
+    servo.rst

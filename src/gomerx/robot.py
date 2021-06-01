@@ -88,6 +88,11 @@ class Robot(object):
         self._client.stop()
 
     def get_version(self):
+        """ 获取机器人固件版本号
+
+        :return: 如："1.0.0"
+        :rtype: str
+        """
         proto = protocol.ProtoGetHardInfo()
         msg = protocol.Message(proto)
         try:
@@ -119,7 +124,11 @@ class Robot(object):
             return None
 
     def get_battery(self):
-        """ 获取机器人电量 """
+        """ 获取机器人电量 
+        
+        :return: [0 ~ 100], 返回机器人的剩余电量百分比
+        :rtype: int
+        """
         proto = protocol.ProtoGetHardInfo()
         msg = protocol.Message(proto)
         try:

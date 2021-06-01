@@ -1,10 +1,10 @@
 ================
-Robot 模块
+Chassis 模块
 ================
 
 
-.. autoclass:: gomerx.robot.Robot
-   :members: arm, skill
+.. autoclass:: gomerx.chassis.Chassis
+   :members: 
    :show-inheritance:
    :exclude-members:
    :inherited-members:

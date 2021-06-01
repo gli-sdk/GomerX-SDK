@@ -1,10 +1,10 @@
 ================
-Robot 模块
+Gripper 模块
 ================
 
 
-.. autoclass:: gomerx.robot.Robot
-   :members: arm, skill
+.. autoclass:: gomerx.gripper.Gripper
+   :members: 
    :show-inheritance:
    :exclude-members:
    :inherited-members:
