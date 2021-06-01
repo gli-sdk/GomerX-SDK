@@ -144,7 +144,7 @@ class Skill(module.Module):
     def move_to_pattern(self, id='A', x=0, y=13):
         action = PatternTrackAction(id, x, y)
         self._action_dispatcher.send_action(action)
-        return action.wait_for_completed()
+        return action.wait_for_completed(timeout=30)
 
     def detect_color_blob(self, hsv_low=(0, 0, 0), hsv_high=(360, 100, 100), timeout=1):
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
@@ -179,4 +179,4 @@ class Skill(module.Module):
     def move_along_line(self):
         action = LineTrackAction(0)
         self._action_dispatcher.send_action(action)
-        return action.wait_for_completed()
+        return action.wait_for_completed(timeout=60)
