@@ -1,10 +1,10 @@
 ================
-Robot 模块
+Camera 模块
 ================
 
 
-.. autoclass:: gomerx.robot.Robot
-   :members: arm, skill
+.. autoclass:: gomerx.camera.Camera
+   :members: 
    :show-inheritance:
    :exclude-members:
    :inherited-members:

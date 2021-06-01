@@ -1,5 +1,6 @@
 build
 dist
 
+.history
 src/gomerx.egg-info
 __pycache__

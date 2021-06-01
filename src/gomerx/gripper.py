@@ -31,12 +31,30 @@ class Gripper(module.Module):
         return True
 
     def open(self, wait_for_complete=True) -> bool:
+        """控制机械手打开
+
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        :type wait_for_complete: bool
+        :return: 机械手打开为 True, 否则为 False
+        :rtype: bool
+        """
         return self._set_angle(0, wait_for_complete)
 
     def close(self, wait_for_complete=True) -> bool:
+        """控制机械手关闭
+
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        :return: 机械手关闭为 True, 否则为 False
+        :rtype: bool
+        """
         return self._set_angle(100, wait_for_complete)
 
     def get_status(self) -> int:
+        """获取机械手张开状态
+
+        :return: 0:完全张开, 1:完全闭合, 2:中间状态
+        :rtype: int
+        """
         proto = protocol.ProtoGripperStatus()
         msg = protocol.Message(proto)
         try:

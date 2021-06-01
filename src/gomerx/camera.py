@@ -17,6 +17,13 @@ class Camera(object):
         self.stop_video_stream()
 
     def start_video_stream(self, display=True):
+        """ 开启视频流
+
+        :param display: 是否显示视频, 默认为 True
+        :type display: bool 
+        :return: 视频流是否开启, 开启返回 True, 否则返回 False
+        :rtype: bool
+        """
         self._conn.open_video()
         self._video_enable = True
         video_thread = threading.Thread(
@@ -25,6 +32,11 @@ class Camera(object):
         video_thread.start()
 
     def stop_video_stream(self):
+        """ 停止视频流
+
+        :return: 视频流是否停止, 视频停止返回 True, 视频未停止返回 False
+        :rtype: bool
+        """
         if self._video_enable:
             self._conn.close_video()
             self._video_enable = False
@@ -32,6 +44,11 @@ class Camera(object):
             self._video_enable = False
 
     def read_cv_image(self):
+        """读取一帧opencv-bgr格式的图片
+
+        :return: 返回一张图片
+        :rtype: numpy
+        """
         if self._yuv:
             w = 800
             h = 600
