@@ -89,7 +89,7 @@ class Action(metaclass=_AutoRegisterAction):
     def make_action_key(self):
         return str(self._action_proto_cls._cmdid) + '-' + str(self._action_id)
 
-    def wait_for_completed(self, timeout=5):
+    def wait_for_completed(self, timeout=10):
         if self._event.is_set() and self.is_completed:
             if self.has_succeeded:
                 return True
