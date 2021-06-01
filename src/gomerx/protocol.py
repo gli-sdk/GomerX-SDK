@@ -20,6 +20,7 @@ class ProtoData(object):
     _cmdid = None
     _cmdprm = None
     _data = None
+    _result = 101
 
     def __init__(self, **kwargs):
         self._buf = None
@@ -101,7 +102,7 @@ def decode_msg(buff: str):
         msg._proto = ProtoGetHardInfo()
     elif 'item' in msg_dict:
         item = msg_dict['item']
-        if item == 5000:
+        if item == 5000 or item == 5001:
             msg._proto = ProtoChassisMove()
         elif item == 5010:
             msg._proto = ProtoArmControl()
@@ -196,13 +197,20 @@ class ProtoChassisMove(ProtoData):
         self._a = 0
 
     def pack_req(self):
-        self.__class__._cmdprm = [self._x, self._y]
+
+        if self._a != 0:
+            self._cmdid = 5001
+            self.__class__._cmdprm = [self._a]
+        else:
+            self._cmdid = 5000
+            self.__class__._cmdprm = [self._x, self._y]
         data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
         return data
 
     def unpack_resp(self, buf):
         info = json.loads(buf)
         self._code = info['code']
+        self._result = info['result']
         return True
 
 
@@ -225,6 +233,7 @@ class ProtoServoControl(ProtoData):
     def unpack_resp(self, buf):
         info = json.loads(buf)
         self._code = info['code']
+        self._result = info['result']
         return True
 
 
@@ -256,6 +265,7 @@ class ProtoArmControl(ProtoData):
     def unpack_resp(self, buf):
         info = json.loads(buf)
         self._code = info['code']
+        self._result = info['result']
         return True
 
 
@@ -274,6 +284,7 @@ class ProtoGripperCtrl(ProtoData):
     def unpack_resp(self, buf):
         info = json.loads(buf)
         self._code = info['code']
+        self._result = info['result']
         return True
 
 

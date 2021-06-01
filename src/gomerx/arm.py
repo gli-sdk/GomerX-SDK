@@ -34,4 +34,4 @@ class Arm(module.Module):
         return True
 
     def recenter(self, wait_for_complete=True):
-        return self.move_to(0, 0, wait_for_complete)
+        return self.move_to(12, 15, wait_for_complete)
