@@ -51,10 +51,9 @@ class Chassis(module.Module):
             if self._auto_timer:
                 if self._auto_timer.is_alive():
                     self._auto_timer.cancel()
-                self._auto_timer = threading.Timer(
-                    timeout, self._auto_stop_timer)
-                self._auto_timer.start()
-                return self._send_sync_proto(proto)
+            self._auto_timer = threading.Timer(timeout, self._auto_stop_timer)
+            self._auto_timer.start()
+            return self._send_sync_proto(proto)
         return self._send_async_proto(proto)
 
     def move(self, x=0, y=0, a=0, wait_for_complete=True):
