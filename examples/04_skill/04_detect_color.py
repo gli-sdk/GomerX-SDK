@@ -19,10 +19,7 @@ if __name__ == '__main__':
             continue
         if result:
             print("Found blue at ", rect)
-            x = rect[0]
-            y = rect[1]
-            w = rect[2]
-            h = rect[3]
+            x, y, w, h = rect
             top_left = (int(x - w / 2), int(y - h / 2))
             right_bottom = (int(x + w / 2), int(y + h / 2))
             cv.rectangle(img, top_left, right_bottom, (0, 255, 0), 2)

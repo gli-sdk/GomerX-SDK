@@ -125,16 +125,33 @@ class Skill(module.Module):
         return (h, s, v)
 
     def detect_face(self, timeout=1):
+        """ 检测人脸
+
+        :param int timout: 超时时间，单位 s
+        :return: 检测到人脸返回True，未检测到返回False
+        """
         action = FaceDetAction(-1, timeout)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed()
 
     def detect_pattern(self, id='A', timeout=1):
+        """ 检测图案
+
+        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
+        :param int timout: 超时时间，单位 s
+        :return: 检测到指定图案返回True，未检测到返回False
+        """
         action = PatternDetAction(id, timeout)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed()
 
     def detect_qrcode(self, timeout=1):
+        """ 检测二维码
+
+        :param int timeout: 超时时间，单位 s
+        :return: result (bool) - 检测到二维码返回True，未检测到返回False \n
+                 data (str) - result为True时，返回二维码字符串信息
+        """
         action = QrCodeDetAction(timeout)
         self._action_dispatcher.send_action(action)
         result = action.wait_for_completed()
@@ -142,11 +159,26 @@ class Skill(module.Module):
         return result, data
 
     def move_to_pattern(self, id='A', x=0, y=13):
+        """ 移动至图案前指定位置
+
+        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
+        :param int x: 停止时，图案中心线与机器人中心线左右距离，图案在机器人右侧为正，单位cm
+        :param int y: 停止时，图案处于机器人摄像头平面前方距离，单位cm
+        :return: 成功移动到图案前指定位置返回True，失败返回False
+        """
         action = PatternTrackAction(id, x, y)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed(timeout=30)
 
     def detect_color_blob(self, hsv_low=(0, 0, 0), hsv_high=(360, 100, 100), timeout=1):
+        """ 检测色块
+
+        :param tuple hsv_low: hsv颜色下边界
+        :param tuple hsv_high: hsv颜色上边界
+        :param int timout: 超时时间，单位 s
+        :return: result (bool) - 检测到色块返回True，未检测到返回False \n
+                 data (list) - result为True时，返回色块中心坐标及宽高[x, y, w, h]
+        """
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
 
@@ -162,6 +194,14 @@ class Skill(module.Module):
         return result, data
 
     def detect_line(self, hsv_low=(0, 0, 0), hsv_high=(360, 100, 100), timeout=1):
+        """ 检测线段
+
+        :param tuple hsv_low: hsv颜色下边界
+        :param tuple hsv_high: hsv颜色上边界
+        :param int timout: 超时时间，单位 s
+        :return: result (bool) - 检测到线段返回True，未检测到返回False \n
+                 data (list) - result为True时，返回线段起点和终点坐标及宽高[x0, y0, x1, y1]
+        """
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
 
@@ -177,6 +217,10 @@ class Skill(module.Module):
         return result, data
 
     def move_along_line(self):
+        """ 自动巡线直到线段消失，使用前需先使用detect_line方法
+
+        :return: 巡线结束返回True，异常返回False
+        """
         action = LineTrackAction(0)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed(timeout=60)
