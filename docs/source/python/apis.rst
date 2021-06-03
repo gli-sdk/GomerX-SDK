@@ -3,12 +3,13 @@ Python API
 ===================
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 0
 
     robot.rst
-    arm.rst
-    camera.rst
     chassis.rst
+    arm.rst
     gripper.rst
-    led.rst
     servo.rst
+    led.rst
+    camera.rst
+    skill.rst

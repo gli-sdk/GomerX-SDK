@@ -26,7 +26,7 @@ copyright = u'2021, GLI GomerX Development Team'
 author = u'GLI GomerX Development Team'
 
 # The short X.Y version
-version = '0.1.2'
+version = '0.1.0'
 # The full version, including alpha/beta/rc tags
 release = u''
 
