@@ -127,7 +127,7 @@ class Skill(module.Module):
     def detect_face(self, timeout=1):
         """ 检测人脸
 
-        :param int timout: 超时时间，单位 s
+        :param int timeout: 超时时间，单位 s
         :return: 检测到人脸返回True，未检测到返回False
         """
         action = FaceDetAction(-1, timeout)
@@ -138,7 +138,7 @@ class Skill(module.Module):
         """ 检测图案
 
         :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int timout: 超时时间，单位 s
+        :param int timeout: 超时时间，单位 s
         :return: 检测到指定图案返回True，未检测到返回False
         """
         # TODO: 抛出InvalidParameter异常
@@ -177,7 +177,7 @@ class Skill(module.Module):
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timout: 超时时间，单位 s
+        :param int timeout: 超时时间，单位 s
         :return: result (bool) - 检测到色块返回True，未检测到返回False \n
                  data (list) - result为True时，返回色块中心坐标及宽高[x, y, w, h]
         """
@@ -201,7 +201,7 @@ class Skill(module.Module):
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timout: 超时时间，单位 s
+        :param int timeout: 超时时间，单位 s
         :return: result (bool) - 检测到线段返回True，未检测到返回False \n
                  data (list) - result为True时，返回线段起点和终点坐标[x0, y0, x1, y1]
         """
