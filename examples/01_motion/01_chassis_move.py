@@ -18,9 +18,9 @@ if __name__ == '__main__':
     # 左移80cm
     chassis.move(x=-80, y=0, a=0, wait_for_complete=True)
 
-    # ''' 再走一个正方形'''
-    # for i in range(4):
-    #     # 前进80cm
-    #     chassis.move(x=0, y=80, a=0, wait_for_complete=True)
-    #     # 右转90°
-    #     chassis.move(x=0, y=0, a=90, wait_for_complete=True)
+    ''' 再走一个正方形'''
+    for i in range(4):
+        # 前进80cm
+        chassis.move(x=0, y=80, a=0, wait_for_complete=True)
+        # 右转90°
+        chassis.move(x=0, y=0, a=90, wait_for_complete=True)

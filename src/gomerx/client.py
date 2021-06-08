@@ -114,7 +114,6 @@ class Client(object):
             ident = self._make_ack_identify(msg)
             self._wait_ack_mutex.acquire()
             if ident in self._wait_ack_list.keys():
-                print("ident in keys")
                 for i, evt in enumerate(self._event_list):
                     if evt._ident == ident and evt._valid:
                         self._wait_ack_list[ident] = msg

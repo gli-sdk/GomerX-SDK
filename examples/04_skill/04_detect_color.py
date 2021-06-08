@@ -22,7 +22,8 @@ if __name__ == '__main__':
             x, y, w, h = rect
             top_left = (int(x - w / 2), int(y - h / 2))
             right_bottom = (int(x + w / 2), int(y + h / 2))
-            cv.rectangle(img, top_left, right_bottom, (0, 255, 0), 2)
+            cv.rectangle(img, top_left, right_bottom,
+                         color=(0, 255, 0), thickness=2)
         else:
             print("Not Found blue")
 
