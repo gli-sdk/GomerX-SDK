@@ -12,6 +12,7 @@ if __name__ == '__main__':
             cv.imshow("img", img)
             if cv.waitKey(27) == 27:
                 break
-
+    
+    cv.destroyAllWindows()
     my_camera.stop_video_stream()
     my_robot.close()
