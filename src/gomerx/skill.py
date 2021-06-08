@@ -141,6 +141,7 @@ class Skill(module.Module):
         :param int timout: 超时时间，单位 s
         :return: 检测到指定图案返回True，未检测到返回False
         """
+        # TODO: 抛出InvalidParameter异常
         action = PatternDetAction(id, timeout)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed()
@@ -166,6 +167,7 @@ class Skill(module.Module):
         :param int y: 停止时，图案处于机器人摄像头平面前方距离，单位cm
         :return: 成功移动到图案前指定位置返回True，失败返回False
         """
+        # TODO: 抛出InvalidParameter异常
         action = PatternTrackAction(id, x, y)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed(timeout=30)
@@ -179,6 +181,7 @@ class Skill(module.Module):
         :return: result (bool) - 检测到色块返回True，未检测到返回False \n
                  data (list) - result为True时，返回色块中心坐标及宽高[x, y, w, h]
         """
+        # TODO: 抛出InvalidParameter异常
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
 
@@ -200,8 +203,9 @@ class Skill(module.Module):
         :param tuple hsv_high: hsv颜色上边界
         :param int timout: 超时时间，单位 s
         :return: result (bool) - 检测到线段返回True，未检测到返回False \n
-                 data (list) - result为True时，返回线段起点和终点坐标及宽高[x0, y0, x1, y1]
+                 data (list) - result为True时，返回线段起点和终点坐标[x0, y0, x1, y1]
         """
+        # TODO: 抛出InvalidParameter异常
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
 

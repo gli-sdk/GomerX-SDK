@@ -35,6 +35,7 @@ class Arm(module.Module):
         :return: 机械臂是否移到绝对位置, 完成返回 True, 未完成返回 False
         :rtype: bool
         """
+        # TODO: 抛出InvalidParameter异常
         action = ArmAction(x, y)
         self._action_dispatcher.send_action(action)
         if wait_for_complete:
