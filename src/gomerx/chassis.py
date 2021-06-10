@@ -42,6 +42,7 @@ class Chassis(module.Module):
         :return: 设置麦轮速度, 设置成功返回 True, 设置失败返回 False
         :rtype: bool
         """
+        # TODO: 抛出InvalidParameter异常
         proto = protocol.ProtoSetWheelSpeed()
         proto._lf = lf
         proto._lb = lb
@@ -66,6 +67,7 @@ class Chassis(module.Module):
         :return: 移动到指定位置返回 True, 否则返回 False
         :rtype: bool
         """
+        # TODO: 抛出InvalidParameter异常
         action = ChassisAction(x, y, a)
         self._action_dispatcher.send_action(action)
         if wait_for_complete:

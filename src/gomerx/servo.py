@@ -33,6 +33,7 @@ class Servo(module.Module):
         :return: 舵机是否移到绝对位置, 移动成功返回 True, 否则返回 False
         :rtype: bool
         """
+        # TODO: 抛出InvalidParameter异常
         action = ServoAction(id, angle)
         self._action_dispatcher.send_action(action)
         if wait_for_complete:
@@ -46,6 +47,7 @@ class Servo(module.Module):
         :return: 舵机角度
         :rtype: int
         """
+        # TODO: 抛出InvalidParameter异常
         proto = protocol.ProtoServoGetAngle()
         proto._id = id
         msg = protocol.Message(proto)
