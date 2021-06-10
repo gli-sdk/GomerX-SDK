@@ -14,10 +14,11 @@ if __name__ == '__main__':
             print("未读取到图片")
         else:
             cv.imshow('img', img)
-            key = cv.waitKey() 
-            if key==ord('q'):
+            print('摁下Q键，退出显示。摁下S键，保存图片。')
+            key = cv.waitKey(0)
+            if key == ord('Q'):
                 break
-            elif key==ord('s'):
+            elif key == ord('S'):
                 cv.imwrite('img.jpg')
                 break
 
