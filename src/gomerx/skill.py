@@ -142,6 +142,8 @@ class Skill(module.Module):
         :return: 检测到指定图案返回True，未检测到返回False
         """
         # TODO: 抛出InvalidParameter异常
+        if not id.isupper() and not id.isdigit():
+            raise Exception('invalid parameter')
         action = PatternDetAction(id, timeout)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed()
@@ -168,6 +170,8 @@ class Skill(module.Module):
         :return: 成功移动到图案前指定位置返回True，失败返回False
         """
         # TODO: 抛出InvalidParameter异常
+        if not id.isupper() and not id.isdigit():
+            raise Exception('invalid parameter')
         action = PatternTrackAction(id, x, y)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed(timeout=30)
@@ -182,6 +186,10 @@ class Skill(module.Module):
                  data (list) - result为True时，返回色块中心坐标及宽高[x, y, w, h]
         """
         # TODO: 抛出InvalidParameter异常
+        if not(0 < hsv_low[0] < 360) or not(0 < hsv_low[1] < 100) or not(0 < hsv_low[2] < 100) \
+                or not(0 < hsv_high[0] < 360) or not(0 < hsv_high[1] < 100) \
+                or not(0 < hsv_high[2] < 100) or not(timeout > 0):
+            raise Exception('invalid parameter')
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
 
@@ -206,6 +214,10 @@ class Skill(module.Module):
                  data (list) - result为True时，返回线段起点和终点坐标[x0, y0, x1, y1]
         """
         # TODO: 抛出InvalidParameter异常
+        if not(0 < hsv_low[0] < 360) or not(0 < hsv_low[1] < 100) or not(0 < hsv_low[2] < 100) \
+                or not(0 < hsv_high[0] < 360) or not(0 < hsv_high[1] < 100) \
+                or not(0 < hsv_high[2] < 100) or not(timeout > 0):
+            raise Exception('invalid parameter')
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
 
