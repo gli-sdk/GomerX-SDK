@@ -21,7 +21,7 @@ if __name__ == '__main__':
     img = cv.circle(img, (250, 150), 30, color=(0, 255, 0), thickness=2)
 
     cv.imshow('img', img)
-    if cv.waitKey(5000) == 27:
+    if cv.waitKey(50) == 27:
         cv.destroyAllWindows()
     my_camera.stop_video_stream()
     my_robot.close()
