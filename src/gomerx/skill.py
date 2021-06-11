@@ -141,7 +141,6 @@ class Skill(module.Module):
         :param int timeout: 超时时间，单位 s
         :return: 检测到指定图案返回True，未检测到返回False
         """
-        # TODO: 抛出InvalidParameter异常
         if not id.isupper() and not id.isdigit():
             raise Exception('invalid parameter')
         action = PatternDetAction(id, timeout)
@@ -185,7 +184,7 @@ class Skill(module.Module):
         :return: result (bool) - 检测到色块返回True，未检测到返回False \n
                  data (list) - result为True时，返回色块中心坐标及宽高[x, y, w, h]
         """
-        # TODO: 抛出InvalidParameter异常
+
         if not(0 < hsv_low[0] < 360) or not(0 < hsv_low[1] < 100) or not(0 < hsv_low[2] < 100) \
                 or not(0 < hsv_high[0] < 360) or not(0 < hsv_high[1] < 100) \
                 or not(0 < hsv_high[2] < 100) or not(timeout > 0):
@@ -213,7 +212,7 @@ class Skill(module.Module):
         :return: result (bool) - 检测到线段返回True，未检测到返回False \n
                  data (list) - result为True时，返回线段起点和终点坐标[x0, y0, x1, y1]
         """
-        # TODO: 抛出InvalidParameter异常
+
         if not(0 < hsv_low[0] < 360) or not(0 < hsv_low[1] < 100) or not(0 < hsv_low[2] < 100) \
                 or not(0 < hsv_high[0] < 360) or not(0 < hsv_high[1] < 100) \
                 or not(0 < hsv_high[2] < 100) or not(timeout > 0):
