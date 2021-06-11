@@ -127,3 +127,42 @@ VScode 环境安装
 2. 在终端内输入 ``python`` ，进入python环境。
 
 .. image:: ./images/win10_use_vscode_setup2.png
+
+
+
+更换 pip 源
+-------------------------
+
+在 python 里经常要安装各种这样的包，安装各种包时最常用的就是 pip，pip 默认从官网下载文件，官网位于国外，下载速度时快时慢，还经常断线，国内的体验并不太好。
+
+解决办法是把 pip 源换成国内的，最常用的并且可信赖的源包括清华大学源、豆瓣源、阿里源。
+
+永久修改
+++++++++++++++++
+1. 打开 VScode 后进入终端控制台，输入 
+
+::
+
+   pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+   pip install --upgrade pip
+   
+即可换源成功，然后我们输入:: 
+
+   pip install opencv-python
+
+即可完成opencv的安装。
+
+
+临时修改
+++++++++++++++++
+1. 如果我们在安装某一个包的时候发现速度仍然很慢，可以使用临时修改的方法。 
+:: 
+
+   pip install opencv-python -i http://pypi.douban.com/simple/
+
+其他的开源镜像站有:: 
+
+   豆瓣：http://pypi.douban.com/simple/
+   中科大：https://pypi.mirrors.ustc.edu.cn/simple/
+   清华：https://pypi.tuna.tsinghua.edu.cn/simple/
+   阿里云：https://mirrors.aliyun.com/pypi/simple/
