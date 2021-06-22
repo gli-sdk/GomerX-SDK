@@ -125,7 +125,7 @@ class Robot(object):
 
     def get_battery(self):
         """ 获取机器人电量 
-        
+
         :return: [0 ~ 100], 返回机器人的剩余电量百分比
         :rtype: int
         """
