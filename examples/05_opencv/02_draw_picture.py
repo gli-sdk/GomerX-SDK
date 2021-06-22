@@ -7,8 +7,8 @@ if __name__ == '__main__':
     my_robot = robot.Robot(robot_name)
     my_camera = my_robot.camera
 
-    bool = my_camera.start_video_stream(display=False)
-    if bool == True:
+    is_open = my_camera.start_video_stream(display=False)
+    if is_open == True:
         print('视频流已打开')
         print('按 ESC 键退出')
         while True:
