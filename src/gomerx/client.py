@@ -136,10 +136,13 @@ class Client(object):
         self._dispatcher.add_handler(obj, name, f)
 
     def start(self):
-        self._conn.connect(self._name)
-        self._thread = threading.Thread(target=self._recv_task)
-        self._thread.setDaemon(True)
-        self._thread.start()
+        result = self._conn.connect(self._name)
+        if result:
+            self._thread = threading.Thread(target=self._recv_task)
+            self._thread.setDaemon(True)
+            self._thread.start()
+        else:
+            logger.error('[Client] Start failed!')
 
     def stop(self):
         if self._thread is not None and self._thread.is_alive():

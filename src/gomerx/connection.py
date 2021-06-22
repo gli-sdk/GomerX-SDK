@@ -48,7 +48,9 @@ class Connection(object):
         name_p = c_char_p(name.encode())
         res = self._lib.ProtocolConnectDevice(name_p, self.receive_msg)
         if res == 1:
-            pass
+            return True
+        else:
+            return False
 
     def destroy(self):
         res = self._lib.ProtocolDestroyConnect()
