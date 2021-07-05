@@ -3,17 +3,16 @@ import cv2 as cv
 import time
 
 if __name__ == '__main__':
-    robot_name = 'GomerX_SkOhHU'
+    robot_name = 'GomerX_6e09ba'
     my_robot = robot.Robot(robot_name)
     my_camera = my_robot.camera
     my_skill = my_robot.skill
     my_camera.start_video_stream(display=False)
     while True:
-
-        result = my_skill.detect_face()
         img = my_camera.read_cv_image()
         if img is None:
             continue
+        result = my_skill.detect_face()
         if result:
             print("Found face")
             cv.putText(img, 'face', (0, 100), fontFace=cv.FONT_HERSHEY_SIMPLEX,
