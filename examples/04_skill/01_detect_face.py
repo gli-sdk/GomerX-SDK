@@ -1,6 +1,5 @@
 from gomerx import robot
 import cv2 as cv
-import time
 
 if __name__ == '__main__':
     robot_name = 'GomerX_6e09ba'
