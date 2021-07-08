@@ -3,14 +3,14 @@ import numpy as np
 from gomerx import robot
 
 
-# 滑动条的回调函数，获取滑动条位置处的值
 def get_track_bar_value(*args):
-    h_min = cv.getTrackbarPos(track_bar_h_min, window_name)
-    h_max = cv.getTrackbarPos(track_bar_h_max, window_name)
-    s_min = cv.getTrackbarPos(track_bar_s_min, window_name)
-    s_max = cv.getTrackbarPos(track_bar_s_max, window_name)
-    v_min = cv.getTrackbarPos(track_bar_v_min, window_name)
-    v_max = cv.getTrackbarPos(track_bar_v_max, window_name)
+    # 滑动条的回调函数，获取滑动条位置处的值
+    h_min = cv.getTrackbarPos(track_bar_h_min, WINDOW_NAME)
+    h_max = cv.getTrackbarPos(track_bar_h_max, WINDOW_NAME)
+    s_min = cv.getTrackbarPos(track_bar_s_min, WINDOW_NAME)
+    s_max = cv.getTrackbarPos(track_bar_s_max, WINDOW_NAME)
+    v_min = cv.getTrackbarPos(track_bar_v_min, WINDOW_NAME)
+    v_max = cv.getTrackbarPos(track_bar_v_max, WINDOW_NAME)
 
     # 值的重映射
     h_min, h_max = 0.5*h_min, 0.5*h_max
@@ -18,6 +18,27 @@ def get_track_bar_value(*args):
     v_min, v_max = v_min*2.55, v_max*2.55
 
     return h_min, h_max, s_min, s_max, v_min, v_max
+
+
+def init_track_bar():
+    # 初始化函数
+    # 创建一个窗口，放置6个滑动条
+    # h_min, h_max 范围 (0-360)
+    # s_min, s_max, v_min, v_max 范围 (0-100)
+    cv.namedWindow(WINDOW_NAME, 0)
+    cv.resizeWindow(WINDOW_NAME, 1000, 800)
+    cv.createTrackbar(track_bar_h_min, WINDOW_NAME,
+                      97, 360, get_track_bar_value)
+    cv.createTrackbar(track_bar_h_max, WINDOW_NAME,
+                      232, 360, get_track_bar_value)
+    cv.createTrackbar(track_bar_s_min, WINDOW_NAME,
+                      30, 100, get_track_bar_value)
+    cv.createTrackbar(track_bar_s_max, WINDOW_NAME,
+                      60, 100, get_track_bar_value)
+    cv.createTrackbar(track_bar_v_min, WINDOW_NAME,
+                      35, 100, get_track_bar_value)
+    cv.createTrackbar(track_bar_v_max, WINDOW_NAME,
+                      60, 100, get_track_bar_value)
 
 
 if __name__ == '__main__':
@@ -32,7 +53,7 @@ if __name__ == '__main__':
         if img is not None:
             break
 
-    window_name = "TrackBars"
+    WINDOW_NAME = "Threshold Editor"
     track_bar_h_max = "H_max"
     track_bar_h_min = "H_min"
     track_bar_s_max = "S_max"
@@ -40,24 +61,8 @@ if __name__ == '__main__':
     track_bar_v_max = "V_max"
     track_bar_v_min = "V_min"
 
-    # 创建一个窗口，放置6个滑动条
-    # h_min, h_max 范围 (0-360)
-    # s_min, s_max, v_min, v_max 范围 (0-100)
-
-    cv.namedWindow(window_name, 0)
-    cv.resizeWindow(window_name, 1000, 800)
-    cv.createTrackbar(track_bar_h_min, window_name,
-                      97, 360, get_track_bar_value)
-    cv.createTrackbar(track_bar_h_max, window_name,
-                      232, 360, get_track_bar_value)
-    cv.createTrackbar(track_bar_s_min, window_name,
-                      30, 100, get_track_bar_value)
-    cv.createTrackbar(track_bar_s_max, window_name,
-                      60, 100, get_track_bar_value)
-    cv.createTrackbar(track_bar_v_min, window_name,
-                      35, 100, get_track_bar_value)
-    cv.createTrackbar(track_bar_v_max, window_name,
-                      60, 100, get_track_bar_value)
+    # 窗口与滚动条的初始化
+    init_track_bar()
 
     while True:
         img = my_camera.read_cv_image()
@@ -78,7 +83,7 @@ if __name__ == '__main__':
         composite_image = np.hstack((img, mask))
 
         # 显示最终结果
-        cv.imshow(window_name, composite_image)
+        cv.imshow(WINDOW_NAME, composite_image)
 
         # 按下 Esc 键退出程序
         if cv.waitKey(1) & 0xFF == 27:
