@@ -2,15 +2,23 @@ import cv2 as cv
 import numpy as np
 from gomerx import robot
 
+WINDOW_NAME = "Threshold Editor"
+TRACK_BAR_H_MAX = "H_max"
+TRACK_BAR_H_MIN = "H_min"
+TRACK_BAR_s_MAX = "S_max"
+TRACK_BAR_s_MIN = "S_min"
+TRACK_BAR_V_MAX = "V_max"
+TRACK_BAR_V_MIN = "V_min"
+
 
 def get_track_bar_value(*args):
     # 滑动条的回调函数，获取滑动条位置处的值
-    h_min = cv.getTrackbarPos(track_bar_h_min, WINDOW_NAME)
-    h_max = cv.getTrackbarPos(track_bar_h_max, WINDOW_NAME)
-    s_min = cv.getTrackbarPos(track_bar_s_min, WINDOW_NAME)
-    s_max = cv.getTrackbarPos(track_bar_s_max, WINDOW_NAME)
-    v_min = cv.getTrackbarPos(track_bar_v_min, WINDOW_NAME)
-    v_max = cv.getTrackbarPos(track_bar_v_max, WINDOW_NAME)
+    h_min = cv.getTrackbarPos(TRACK_BAR_H_MIN, WINDOW_NAME)
+    h_max = cv.getTrackbarPos(TRACK_BAR_H_MAX, WINDOW_NAME)
+    s_min = cv.getTrackbarPos(TRACK_BAR_s_MIN, WINDOW_NAME)
+    s_max = cv.getTrackbarPos(TRACK_BAR_s_MAX, WINDOW_NAME)
+    v_min = cv.getTrackbarPos(TRACK_BAR_V_MIN, WINDOW_NAME)
+    v_max = cv.getTrackbarPos(TRACK_BAR_V_MAX, WINDOW_NAME)
 
     # 值的重映射
     h_min, h_max = 0.5*h_min, 0.5*h_max
@@ -27,17 +35,17 @@ def init_track_bar():
     # s_min, s_max, v_min, v_max 范围 (0-100)
     cv.namedWindow(WINDOW_NAME, 0)
     cv.resizeWindow(WINDOW_NAME, 1000, 800)
-    cv.createTrackbar(track_bar_h_min, WINDOW_NAME,
+    cv.createTrackbar(TRACK_BAR_H_MIN, WINDOW_NAME,
                       97, 360, get_track_bar_value)
-    cv.createTrackbar(track_bar_h_max, WINDOW_NAME,
+    cv.createTrackbar(TRACK_BAR_H_MAX, WINDOW_NAME,
                       232, 360, get_track_bar_value)
-    cv.createTrackbar(track_bar_s_min, WINDOW_NAME,
+    cv.createTrackbar(TRACK_BAR_s_MIN, WINDOW_NAME,
                       30, 100, get_track_bar_value)
-    cv.createTrackbar(track_bar_s_max, WINDOW_NAME,
+    cv.createTrackbar(TRACK_BAR_s_MAX, WINDOW_NAME,
                       60, 100, get_track_bar_value)
-    cv.createTrackbar(track_bar_v_min, WINDOW_NAME,
+    cv.createTrackbar(TRACK_BAR_V_MIN, WINDOW_NAME,
                       35, 100, get_track_bar_value)
-    cv.createTrackbar(track_bar_v_max, WINDOW_NAME,
+    cv.createTrackbar(TRACK_BAR_V_MAX, WINDOW_NAME,
                       60, 100, get_track_bar_value)
 
 
@@ -52,14 +60,6 @@ if __name__ == '__main__':
         img = my_camera.read_cv_image()
         if img is not None:
             break
-
-    WINDOW_NAME = "Threshold Editor"
-    track_bar_h_max = "H_max"
-    track_bar_h_min = "H_min"
-    track_bar_s_max = "S_max"
-    track_bar_s_min = "S_min"
-    track_bar_v_max = "V_max"
-    track_bar_v_min = "V_min"
 
     # 窗口与滚动条的初始化
     init_track_bar()
@@ -80,10 +80,10 @@ if __name__ == '__main__':
         mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
 
         # 对阈值处理后的图和原图进行拼接
-        composite_image = np.hstack((img, mask))
+        stitching_image = np.hstack((img, mask))
 
         # 显示最终结果
-        cv.imshow(WINDOW_NAME, composite_image)
+        cv.imshow(WINDOW_NAME, stitching_image)
 
         # 按下 Esc 键退出程序
         if cv.waitKey(1) & 0xFF == 27:
