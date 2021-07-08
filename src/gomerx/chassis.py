@@ -60,9 +60,9 @@ class Chassis(module.Module):
     def move(self, x=0, y=0, a=0, wait_for_complete=True):
         """控制底盘运动当指定位置, 坐标轴原点为当前位置
 
-        :param int x: [-100 ~ 100], x轴向运动距离, 单位cm
-        :param int y: [-100 ~ 100], y轴向运动距离, 单位cm
-        :param int a: [-100 ~ 100], z轴旋转角度, 单位cm
+        :param int x: [-160 ~ 160], x 轴向运动距离, 右为正值, 单位 cm
+        :param int y: [-160 ~ 160], y 轴向运动距离, 前为正值, 单位 cm
+        :param int a: [-180 ~ 180], z 轴旋转角度, 右为正值, 单位 °
         :param bool wait_for_complete: 是否等待执行完成, 默认为 True
         :return: 移动到指定位置返回 True, 否则返回 False
         :rtype: bool
