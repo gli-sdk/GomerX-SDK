@@ -43,6 +43,9 @@ class Chassis(module.Module):
         :rtype: bool
         """
         # TODO: 抛出InvalidParameter异常
+        if not(-100 < lf < 100) or not(-100 < lb < 100) or not(-100 < rf < 100) \
+                or not(-100 < rb < 100) or not(timeout > 0):
+            raise Exception("invalid parameter")
         proto = protocol.ProtoSetWheelSpeed()
         proto._lf = lf
         proto._lb = lb
@@ -67,7 +70,9 @@ class Chassis(module.Module):
         :return: 移动到指定位置返回 True, 否则返回 False
         :rtype: bool
         """
-        # TODO: 抛出InvalidParameter异常
+
+        if not(-160 <= x <= 160) or not(-160 <= y <= 160) or not(-180 <= a <= 180):
+            raise Exception("invalid parameter")
         action = ChassisAction(x, y, a)
         self._action_dispatcher.send_action(action)
         if wait_for_complete:
