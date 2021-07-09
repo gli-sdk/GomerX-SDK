@@ -49,7 +49,7 @@ class Servo(module.Module):
         :return: 舵机角度
         :rtype: int
         """
-        # TODO: 抛出InvalidParameter异常
+        
         if (id != 0 and id != 1):
             raise Exception('invaild parameter')
         proto = protocol.ProtoServoGetAngle()

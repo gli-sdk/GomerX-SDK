@@ -70,8 +70,8 @@ class Chassis(module.Module):
         :return: 移动到指定位置返回 True, 否则返回 False
         :rtype: bool
         """
-        # TODO: 抛出InvalidParameter异常
-        if not(-100 < x < 100) or not(-100 < y < 100) or not(-100 < a < 100):
+        
+        if not(-160 <= x <= 160) or not(-160 <= y <= 160) or not(-180 <= a <= 180):
             raise Exception("invalid parameter")
         action = ChassisAction(x, y, a)
         self._action_dispatcher.send_action(action)

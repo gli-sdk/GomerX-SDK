@@ -164,12 +164,14 @@ class Skill(module.Module):
         """ 移动至图案前指定位置
 
         :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int x: 停止时，图案中心线与机器人中心线左右距离，图案在机器人右侧为正，单位cm
-        :param int y: 停止时，图案处于机器人摄像头平面前方距离，单位cm
+        :param int x: 停止时，图案中心线与机器人中心线左右距离, 范围[-30, 30], 图案在机器人右侧为正，单位cm
+        :param int y: 停止时，图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
         :return: 成功移动到图案前指定位置返回True，失败返回False
         """
-        # TODO: 抛出InvalidParameter异常
+        
         if not id.isupper() and not id.isdigit():
+            raise Exception('invalid parameter')
+        if not(-30 <= x <= 30) or not(13 <= y <= 60) :
             raise Exception('invalid parameter')
         action = PatternTrackAction(id, x, y)
         self._action_dispatcher.send_action(action)
