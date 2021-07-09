@@ -34,7 +34,7 @@ class Servo(module.Module):
         :rtype: bool
         """
         # TODO: 抛出InvalidParameter异常
-        if (id != 0 and id != 1) or not(0<angle<180):
+        if (id != 0 and id != 1) or not(0 < angle < 180):
             raise Exception('invaild parameter')
         action = ServoAction(id, angle)
         self._action_dispatcher.send_action(action)
@@ -49,7 +49,7 @@ class Servo(module.Module):
         :return: 舵机角度
         :rtype: int
         """
-        
+
         if (id != 0 and id != 1):
             raise Exception('invaild parameter')
         proto = protocol.ProtoServoGetAngle()

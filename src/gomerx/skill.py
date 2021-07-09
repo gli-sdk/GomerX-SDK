@@ -168,10 +168,10 @@ class Skill(module.Module):
         :param int y: 停止时，图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
         :return: 成功移动到图案前指定位置返回True，失败返回False
         """
-        
+
         if not id.isupper() and not id.isdigit():
             raise Exception('invalid parameter')
-        if not(-30 <= x <= 30) or not(13 <= y <= 60) :
+        if not(-30 <= x <= 30) or not(13 <= y <= 60):
             raise Exception('invalid parameter')
         action = PatternTrackAction(id, x, y)
         self._action_dispatcher.send_action(action)

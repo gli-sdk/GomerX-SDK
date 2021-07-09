@@ -70,7 +70,7 @@ class Chassis(module.Module):
         :return: 移动到指定位置返回 True, 否则返回 False
         :rtype: bool
         """
-        
+
         if not(-160 <= x <= 160) or not(-160 <= y <= 160) or not(-180 <= a <= 180):
             raise Exception("invalid parameter")
         action = ChassisAction(x, y, a)
