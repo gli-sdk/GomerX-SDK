@@ -11,13 +11,12 @@ import json
 
 class Connection(object):
     _instance_lock = threading.Lock()
-    _yuv_queue = Queue()
+    _yuv = None
     _msg_queue = Queue()
 
     @CFUNCTYPE(c_int, POINTER(c_ubyte), c_int, c_int)
     def receive_video_data(yuv_data, w, h):
-        yuv = string_at(yuv_data, int(w * h * 3 / 2))
-        Connection._yuv_queue.put_nowait(yuv)
+        Connection._yuv = string_at(yuv_data, int(w * h * 3 / 2))
         return 0
 
     @CFUNCTYPE(c_int, c_char_p, c_int)
@@ -61,11 +60,17 @@ class Connection(object):
         msg_buf = create_string_buffer(msg.encode())
         self._lib.ProtocolSendMessage(msg_buf)
 
-    def open_video(self):
-        self._lib.ProtocolOpenVideo(self.receive_video_data)
+    def open_video(self, display=True):
+        if display:
+            self._lib.ProtocolOpenVideoAndDisplay()
+        else:
+            self._lib.ProtocolOpenVideo(self.receive_video_data)
 
-    def close_video(self):
-        self._lib.ProtocolCloseVideo()
+    def close_video(self, display=True):
+        if display:
+            self._lib.ProtocolCloseVideoAndDisplay()
+        else:
+            self._lib.ProtocolCloseVideo()
 
     def recv(self):
         if not self._msg_queue.empty():
