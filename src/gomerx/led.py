@@ -15,12 +15,14 @@ class Led(module.Module):
 
     def set_led(self, color=(0, 0, 0), effect=EFFECT_ON):
         """设置灯光颜色和显示模式
-    
+
         :param tuple color: color=(R, G, B), 灯光颜色采用RGB模型组成. R:[0~255], 红色光分量, G:[0~255], 绿色光分量, B:[0~255], 蓝色光分量
         :param enum effect: "on":开启灯光, "off":关闭灯光
         :return: 灯光设置是否成功, 设置成功返回 True, 设置失败返回 False
         :rtype: bool
         """
+        if not(0 < color[0]) < 255 or not(0 < color[1] < 255) or not(0 < color[2] < 255):
+            raise Exception('invalid parameter.')
         proto = protocol.ProtoSetLed(color)
         if effect is EFFECT_OFF:
             proto._effect = 0

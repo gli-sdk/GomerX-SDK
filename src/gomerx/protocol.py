@@ -102,7 +102,7 @@ def decode_msg(buff: str):
         msg._proto = ProtoGetHardInfo()
     elif 'item' in msg_dict:
         item = msg_dict['item']
-        if item == 5000 or item == 5001:
+        if item == 5003:
             msg._proto = ProtoChassisMove()
         elif item == 5002:
             msg._proto = ProtoSetWheelSpeed()
@@ -194,7 +194,7 @@ class ProtoSetWheelSpeed(ProtoData):
 
 
 class ProtoChassisMove(ProtoData):
-    _cmdid = 5000
+    _cmdid = 5003
 
     def __init__(self):
         self._action_id = 0
@@ -203,13 +203,7 @@ class ProtoChassisMove(ProtoData):
         self._a = 0
 
     def pack_req(self):
-
-        if self._a != 0:
-            self._cmdid = 5001
-            self.__class__._cmdprm = [self._a]
-        else:
-            self._cmdid = 5000
-            self.__class__._cmdprm = [self._x, self._y]
+        self.__class__._cmdprm = [self._x, self._y, self._a]
         data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
         return data
 

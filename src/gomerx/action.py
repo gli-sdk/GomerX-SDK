@@ -36,6 +36,7 @@ class _AutoRegisterAction(type):
 class Action(metaclass=_AutoRegisterAction):
     _action_mutex = threading.Lock()
     _next_action_id = SDK_FIRST_ACTION_ID
+    _action_proto_cls = None
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -177,8 +178,13 @@ class ActionDispatcher(object):
     def send_action(self, action: Action):
         action._action_id = action._get_next_action_id()
         if self.has_in_progress_actions:
-            logger.error("robot is already performing action")
-            raise Exception("robot is already performing action")
+            self._in_progress_mutex.acquire()
+            for k in self._in_progress:
+                act = self._in_progress[k]
+                if act._action_proto_cls == action._action_proto_cls:
+                    logger.error("robot is already performing action")
+                    raise Exception("robot is already performing action")
+            self._in_progress_mutex.release()
         if action.is_running:
             raise Exception("action is running")
 

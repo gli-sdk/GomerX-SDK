@@ -44,7 +44,7 @@ class Camera(object):
     def read_cv_image(self):
         """读取一帧opencv-bgr格式的图片
 
-        :return: 返回一张图片
+        :return: 返回一张图片, 分辨率为 800x600
         :rtype: numpy
         """
         if self._yuv:
