@@ -1,3 +1,4 @@
+from time import sleep
 import numpy as np
 import cv2 as cv
 import threading
@@ -63,3 +64,4 @@ class Camera(object):
                     img = self.read_cv_image()
                     cv.imshow("GomerX View", img)
                     cv.waitKey(27)
+            sleep(0.01)

@@ -11,7 +11,7 @@ if __name__ == '__main__':
         img = my_camera.read_cv_image()
         if img is None:
             continue
-        result = my_skill.detect_face()
+        result = my_skill.detect_face(timeout=0)
         if result:
             print("Found face")
             cv.putText(img, 'face', (0, 100), fontFace=cv.FONT_HERSHEY_SIMPLEX,
