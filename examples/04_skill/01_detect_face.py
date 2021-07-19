@@ -21,7 +21,7 @@ if __name__ == '__main__':
             cv.putText(img, 'no face', (0, 100), fontFace=cv.FONT_HERSHEY_SIMPLEX,
                        fontScale=3, color=(0, 0, 255), thickness=5)
         cv.imshow('win', img)
-        if cv.waitKey(20) == 27:
+        if cv.waitKey(1) == 27:
             break
     cv.destroyAllWindows()
     my_camera.stop_video_stream()
