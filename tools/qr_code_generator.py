@@ -1,4 +1,5 @@
 # -*- encoding = utf-8 -*-
+from numpy.lib.npyio import save
 import qrcode
 from tkinter import *
 from tkinter import messagebox
@@ -6,7 +7,7 @@ from tkinter import filedialog
 import tkinter as tk
 import os
 from PIL import Image, ImageTk
-import cv2 as cv
+import cv2
 import numpy as np
 
 
@@ -33,7 +34,12 @@ def refreshText():
         global img_png
 
         save_img = qrcode.make(string)
-        img_png = ImageTk.PhotoImage(save_img, size=(30, 30))
+        num_img = 255 * np.array(save_img).astype('uint8')
+        img = cv2.cvtColor(np.asarray(num_img), cv2.COLOR_RGB2BGR)
+        resize_img = cv2.resize(img, (300, 300))
+        img = Image.fromarray(cv2.cvtColor(resize_img, cv2.COLOR_BGR2RGB))
+
+        img_png = ImageTk.PhotoImage(img)
         label_image = Label(root, image=img_png)
         label_image.grid(row=2, column=0, padx=10, pady=10)
 
