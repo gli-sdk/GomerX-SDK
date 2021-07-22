@@ -37,7 +37,8 @@ setup(
     install_requires=[
         'numpy >= 1.18.1',
         'opencv-python >= 4.2.0',
-        'qrcode >= 7.1'
+        'qrcode >= 7.1',
+        'Pillow >= 8.2.0'
     ],
     data_files=data_files
 )
