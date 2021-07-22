@@ -1,11 +1,8 @@
 # -*- encoding = utf-8 -*-
-from numpy.lib.npyio import save
 import qrcode
 from tkinter import *
 from tkinter import messagebox
 from tkinter import filedialog
-import tkinter as tk
-import os
 from PIL import Image, ImageTk
 import cv2
 import numpy as np
