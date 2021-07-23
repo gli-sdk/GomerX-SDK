@@ -1,6 +1,6 @@
 # -*- encoding = utf-8 -*-
 import qrcode
-from tkinter import *
+from tkinter import Tk, Entry, Label, Button, SE, SW
 from tkinter import messagebox
 from tkinter import filedialog
 from PIL import Image, ImageTk
@@ -45,9 +45,9 @@ def refreshText():
 
 if __name__ == "__main__":
     root = Tk()
-    e = StringVar()
     root.title('二维码生成器')
     root.geometry('360x470')
+    root.resizable(0, 0)
     img_png = None
     entry_txt = Entry(root, font=('微软雅黑', 20))
     entry_txt.grid(row=0, column=0, padx=20, pady=30)
