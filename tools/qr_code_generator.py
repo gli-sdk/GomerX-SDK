@@ -16,9 +16,11 @@ def save_image_dialog():
         img = qrcode.make(string)
         filename = filedialog.asksaveasfilename(
             defaultextension='.png')
-
-        img.save(filename)
-        messagebox.showinfo('提示', '%s保存成功' % filename)
+        try:
+            img.save(filename)
+            messagebox.showinfo('提示', '%s保存成功' % filename)
+        except FileNotFoundError:
+            print('请输入文件名')
 
 
 def instructions_dialog():
@@ -37,38 +39,38 @@ def refresh_text():
         resize_img = cv2.resize(num_img, (300, 300))
         img = Image.fromarray(resize_img)
         img_png = ImageTk.PhotoImage(img)
-        label_image = Label(root, image=img_png)
+        label_image = Label(main_window, image=img_png)
         label_image.grid(row=2, column=0, padx=10, pady=10)
     else:
         blank_image = Image.new('RGB', (300, 300), (255, 255, 255))
         blank_image = ImageTk.PhotoImage(blank_image)
-        label_none_text = Label(root, image=blank_image)
+        label_none_text = Label(main_window, image=blank_image)
         label_none_text.grid(row=2, column=0, padx=10, pady=10)
-    root.after(300, refresh_text)
+    main_window.after(300, refresh_text)
 
 
 if __name__ == "__main__":
-    root = Tk()
-    root.title('二维码生成器')
-    root.geometry('360x470')
-    root.resizable(0, 0)
+    main_window = Tk()
+    main_window.title('二维码生成器')
+    main_window.geometry('360x470')
+    main_window.resizable(0, 0)
     img_png = None
-    entry_txt = Entry(root, font=('微软雅黑', 20))
+    entry_txt = Entry(main_window, font=('微软雅黑', 20))
     entry_txt.grid(row=0, column=0, padx=20, pady=30)
 
-    label_image = Label(root)
+    label_image = Label(main_window)
     label_image.grid(row=2, column=0, padx=20, pady=150)
 
-    save_button = Button(root, text='保存图片',
+    save_button = Button(main_window, text='保存图片',
                          font=('微软雅黑', 15),
                          command=save_image_dialog)
     save_button.grid(row=4, sticky=SE)
 
-    use_guide_button = Button(root,
+    use_guide_button = Button(main_window,
                               text='使用说明',
                               font=('微软雅黑', 15),
                               command=instructions_dialog)
     use_guide_button.grid(row=4, sticky=SW)
 
-    root.after(500, refresh_text)
-    root.mainloop()
+    main_window.after(500, refresh_text)
+    main_window.mainloop()
