@@ -38,7 +38,8 @@ setup(
         'numpy >= 1.18.1',
         'opencv-python >= 4.2.0',
         'qrcode >= 7.1',
-        'Pillow >= 8.2.0'
+        'pillow >= 8.2.0',
+        'tensorflow >= 2.3.0'
     ],
     data_files=data_files
 )
