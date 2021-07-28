@@ -13,7 +13,7 @@ class Led(module.Module):
     def __init__(self, robot):
         super().__init__(robot)
 
-    def set_led(self, color=(0, 0, 0), effect=EFFECT_ON):
+    def set_led(self, color=(0, 0, 0), effect=EFFECT_ON, T=1000):
         """设置灯光颜色和显示模式
 
         :param tuple color: color=(R, G, B), 灯光颜色采用RGB模型组成. R:[0~255], 红色光分量, G:[0~255], 绿色光分量, B:[0~255], 蓝色光分量
@@ -30,9 +30,9 @@ class Led(module.Module):
             proto._effect = 1
         elif effect is EFFECT_FLASH:
             proto._effect = 2
+            proto._t = T
         elif effect is EFFECT_BREATH:
             proto._effect = 3
-            proto._t1 = 1000
-            proto._t2 = 1000
+            proto._t = T
 
         return self._send_sync_proto(proto)
