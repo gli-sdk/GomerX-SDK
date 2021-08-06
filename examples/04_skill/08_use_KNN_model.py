@@ -1,3 +1,4 @@
+# 导入我们所需要的模块
 from tensorflow.keras.applications.mobilenet import MobileNet
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import Model
@@ -7,6 +8,7 @@ import os
 import numpy as np
 from gomerx import robot
 
+# 定义一些后面会用到的常量
 WINDOW_NAME = "Machine Learning"
 SAMPLE_NUM = 3
 IMAGE_NUM = 9
@@ -16,6 +18,7 @@ CURRENT_WORK_DIR = os.getcwd()
 
 
 def get_videostream_image_feature(image_path, model):
+    # 定义函数，处理得到的视频流。能够用于分类模型
     img = cv.resize(image_path, (224, 224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
@@ -29,11 +32,12 @@ def KNN_classify(input, dataSet, label, k=10):
     # 计算欧式距离
     diff = np.tile(input, (data_size, 1)) - dataSet
     sqdiff = diff ** 2
-    square_dist = np.sum(sqdiff, axis=1)  # 行向量分别相加，从而得到新的一个行向量
+    # 行向量分别相加，从而得到新的一个行向量
+    square_dist = np.sum(sqdiff, axis=1)
     dist = square_dist ** 0.5
 
     # 对距离进行排序
-    sorted_dist_index = np.argsort(dist)  # argsort()根据元素的值从大到小对元素进行排序，返回下标
+    sorted_dist_index = np.argsort(dist)
 
     # 构建字典，为后面得到比例做准备
     class_count = {1: 0, 2: 0, 3: 0}
@@ -50,19 +54,18 @@ if __name__ == '__main__':
     base_model = MobileNet(weights='imagenet')
     model = Model(inputs=base_model.input,
                   outputs=base_model.get_layer('dropout').output)
-
     # 连接机器人
     robot_name = 'GomerX_6e09ba'
     my_robot = robot.Robot(robot_name)
     my_camera = my_robot.camera
     my_camera.start_video_stream(display=False)
-
     # 加载train_model产生的数据文件
     model_data = np.load(CURRENT_WORK_DIR+TMP_FILE_DIR + 'model_data.npy')
     features = model_data[:, 0:1024]
     labels = model_data[:, 1024]
     print('加载模型数据完毕')
     print("分类程序开始，放置不同类别的物品")
+    # 开始控制机器人
     while True:
         frame = my_camera.read_cv_image()
         if frame is not None:
@@ -79,7 +82,5 @@ if __name__ == '__main__':
                 my_arm.move_to(12, 10)
                 my_arm.move_to(12, 15)
             else:
+                # 如果是其他情况则保持不动
                 continue
-
-            if cv.waitKey(1) == 27:
-                break
