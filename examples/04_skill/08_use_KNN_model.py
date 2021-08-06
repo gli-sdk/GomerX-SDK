@@ -45,43 +45,6 @@ def KNN_classify(input, dataSet, label, k=10):
     return class_count
 
 
-def draw_rectangle(raw_image):
-    # 画一个矩形，并返回矩形的坐标
-    row, col, channel = raw_image.shape
-    longe_edge = max(row, col)
-    short_edge = min(row, col)
-    square_edge = int(short_edge/2)
-    core_index = (int(longe_edge/2), int(short_edge/2))
-    top_left_coordinate = (
-        core_index[0]-square_edge, core_index[1]-square_edge)
-    down_right_coordinate = (
-        core_index[0]+square_edge, core_index[1]+square_edge)
-    rectangle_image = cv.rectangle(raw_image, top_left_coordinate,
-                                   down_right_coordinate, (0, 0, 255), 3)
-
-    return rectangle_image
-
-
-def draw_category_ration_text(image, classes_dict):
-    # 计算概率
-    confidence_A = classes_dict.get(1)/10
-    confidence_B = classes_dict.get(2)/10
-    confidence_C = classes_dict.get(3)/10
-    # 给图片添加文字
-    line1_text = " sample1 : %3d %% " % (confidence_A*100)
-    line2_text = " sample2 : %3d %% " % (confidence_B*100)
-    line3_text = " sample3 : %3d %% " % (confidence_C*100)
-    rectangle_image = draw_rectangle(image)
-    cv.putText(rectangle_image, line1_text, (30, 40), cv.FONT_HERSHEY_SIMPLEX,
-               1, (0, 255, 0), 2, 8)
-    cv.putText(rectangle_image, line2_text, (30, 70), cv.FONT_HERSHEY_SIMPLEX,
-               1, (0, 255, 0), 2, 8)
-    cv.putText(rectangle_image, line3_text, (30, 100), cv.FONT_HERSHEY_SIMPLEX,
-               1, (0, 255, 0), 2, 8)
-
-    return rectangle_image
-
-
 if __name__ == '__main__':
     # 指定模型到某一层截至，只获得指定层的输出
     base_model = MobileNet(weights='imagenet')
@@ -99,21 +62,19 @@ if __name__ == '__main__':
     features = model_data[:, 0:1024]
     labels = model_data[:, 1024]
     print('加载模型数据完毕')
-
+    print("分类程序开始，放置不同类别的物品")
     while True:
         frame = my_camera.read_cv_image()
         if frame is not None:
-            print("分类程序开始，放置不同类别的物品")
             image_feature = get_videostream_image_feature(frame, model)
             classes_dict = KNN_classify(image_feature, features, labels, k=10)
-            ration_image = draw_category_ration_text(frame, classes_dict)
             if classes_dict[2] >= 9:
-                # 如果是第二类，则动一动机械臂
-                # 如果是第一类，则开闭爪子
+                # 如果是第二类，则开闭爪子
                 my_gripper = my_robot.gripper
                 my_gripper.close()
                 my_gripper.open()
             elif classes_dict[3] >= 9:
+                # 如果是第三类，则动一动机械臂
                 my_arm = my_robot.arm
                 my_arm.move_to(12, 10)
                 my_arm.move_to(12, 15)
