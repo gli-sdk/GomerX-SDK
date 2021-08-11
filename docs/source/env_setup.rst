@@ -116,6 +116,16 @@ VScode 环境安装
 
 .. image:: ./images/win10_config_vscode_setup4.png
 
+5. 点击红色方框框选处。
+
+.. image:: ./images/win10_config_vscode_setup1.png
+
+6. 搜索框输入 ``python``，点击install
+
+.. image:: ./images/win10_vscode_install_python.png
+
+7. 配置完成
+
 
 使用 VScode
 ++++++++++++++++++
