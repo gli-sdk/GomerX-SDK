@@ -187,9 +187,9 @@ class Skill(module.Module):
                  data (list) - result为True时，返回色块中心坐标及宽高[x, y, w, h]
         """
 
-        if not(0 < hsv_low[0] < 360) or not(0 < hsv_low[1] < 100) or not(0 < hsv_low[2] < 100) \
-                or not(0 < hsv_high[0] < 360) or not(0 < hsv_high[1] < 100) \
-                or not(0 < hsv_high[2] < 100) or not(timeout > 0):
+        if not(0 <= hsv_low[0] <= 360) or not(0 <= hsv_low[1] <= 100) or not(0 <= hsv_low[2] <= 100) \
+                or not(0 <= hsv_high[0] <= 360) or not(0 <= hsv_high[1] <= 100) \
+                or not(0 <= hsv_high[2] <= 100) or not(timeout >= 0):
             raise Exception('invalid parameter')
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
@@ -215,9 +215,9 @@ class Skill(module.Module):
                  data (list) - result为True时，返回线段起点和终点坐标[x0, y0, x1, y1]
         """
 
-        if not(0 < hsv_low[0] < 360) or not(0 < hsv_low[1] < 100) or not(0 < hsv_low[2] < 100) \
-                or not(0 < hsv_high[0] < 360) or not(0 < hsv_high[1] < 100) \
-                or not(0 < hsv_high[2] < 100) or not(timeout > 0):
+        if not(0 <= hsv_low[0] <= 360) or not(0 <= hsv_low[1] <= 100) or not(0 <= hsv_low[2] <= 100) \
+                or not(0 <= hsv_high[0] <= 360) or not(0 <= hsv_high[1] <= 100) \
+                or not(0 <= hsv_high[2] <= 100) or not(timeout >= 0):
             raise Exception('invalid parameter')
         _hsv_low = self.__class__._hsv_in_cv(hsv_low)
         _hsv_high = self.__class__._hsv_in_cv(hsv_high)
