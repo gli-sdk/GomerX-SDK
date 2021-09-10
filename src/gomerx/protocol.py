@@ -126,7 +126,7 @@ def decode_msg(buff: str):
             msg._proto = ProtoLineDet()
         elif item == 5170:
             msg._proto = ProtoLineTrack()
-        elif item == 5300:
+        elif item == 5303:
             msg._proto = ProtoSetLed()
     return msg
 
@@ -159,15 +159,17 @@ class ProtoGetHardInfo(ProtoData):
 
 class ProtoSetLed(ProtoData):
 
-    _cmdid = 5300
+    _cmdid = 5303
 
     def __init__(self, color=(0, 0, 0)):
         self._r = color[0]
         self._g = color[1]
         self._b = color[2]
+        self._effect = 0
+        self._t = 0
 
     def pack_req(self):
-        self.__class__._cmdprm = [0xff, self._r, self._g, self._b]
+        self.__class__._cmdprm = [0xff, self._r, self._g, self._b, self._effect, self._t]
         data = {'item': self._cmdid, 'param': self.__class__._cmdprm}
         return data
 
