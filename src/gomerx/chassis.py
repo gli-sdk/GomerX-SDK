@@ -31,20 +31,20 @@ class Chassis(module.Module):
     def _auto_stop_timer(self):
         self.drive_wheels(0, 0, 0, 0)
 
-    def drive_wheels(self, lf=0, lb=0, rf=0, rb=0, timeout=None):
+    def drive_wheels(self, lf=0, lb=0, rf=0, rb=0, timeout=10):
         """ 设置麦轮速度
 
         :param int lf: [-100 ~ 100], 左前轮
         :param int lb: [-100 ~ 100], 左后轮
         :param int rf: [-100 ~ 100], 右前轮
         :param int rb: [-100 ~ 100], 右后轮
-        :param float timeout: [0 ~ inf], 超过指定时间未收到新指令则停止运动, 单位s
+        :param float timeout: [1 ~ inf], 超过指定时间未收到新指令则停止运动, 单位s
         :return: 设置麦轮速度, 设置成功返回 True, 设置失败返回 False
         :rtype: bool
         """
         # TODO: 抛出InvalidParameter异常
-        if not(-100 < lf < 100) or not(-100 < lb < 100) or not(-100 < rf < 100) \
-                or not(-100 < rb < 100) or not(timeout > 0):
+        if not(-100 <= lf <= 100) or not(-100 <= lb <= 100) or not(-100 <= rf <= 100) \
+                or not(-100 <= rb <= 100) or not(timeout > 0):
             raise Exception("invalid parameter")
         proto = protocol.ProtoSetWheelSpeed()
         proto._lf = lf

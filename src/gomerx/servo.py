@@ -34,8 +34,12 @@ class Servo(module.Module):
         :rtype: bool
         """
         # TODO: 抛出InvalidParameter异常
-        if (id != 0 and id != 1) or not(0 < angle < 180):
+        if (id != 0 and id != 1) or not(0 <= angle <= 180):
             raise Exception('invaild parameter')
+        if (id == 0 and angle < 85):
+            raise Exception('invaild servo-0 angle')
+        if (id == 1 and angle > 110):
+            raise Exception('invaild servo-1 angle')
         action = ServoAction(id, angle)
         self._action_dispatcher.send_action(action)
         if wait_for_complete:
