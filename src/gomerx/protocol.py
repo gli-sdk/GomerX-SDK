@@ -120,7 +120,7 @@ def decode_msg(buff: str):
             msg._proto = ProtoFaceSave()
         elif item == 5103:
             msg._proto = ProtoFaceDel()
-        elif item == 5104:
+        elif item == 5105:
             msg._proto = ProtoFaceRec()
         elif item == 5110:
             msg._proto = ProtoPatternDet()
@@ -406,7 +406,7 @@ class ProtoFaceList(ProtoData):
         return True
 
 class ProtoFaceRec(ProtoData):
-    _cmdid = 5104
+    _cmdid = 5105
 
     def __init__(self):
         self._action_id = 0
