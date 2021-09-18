@@ -60,6 +60,11 @@ class Connection(object):
         msg_buf = create_string_buffer(msg.encode())
         self._lib.ProtocolSendMessage(msg_buf)
 
+    def send_file(self, type: int, path: str, info: str):
+        path = create_string_buffer(path.encode())
+        info = create_string_buffer(info.encode())
+        self._lib.ProtocolSendFileBlock(type, path, info)
+
     def open_video(self, display=True):
         if display:
             self._lib.ProtocolOpenVideoAndDisplay()
