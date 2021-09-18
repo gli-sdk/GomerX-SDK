@@ -114,6 +114,14 @@ def decode_msg(buff: str):
             msg._proto = ProtoGripperCtrl()
         elif item == 5100:
             msg._proto = ProtoFaceDet()
+        elif item == 5101:
+            msg._proto = ProtoFaceList()
+        elif item == 5102:
+            msg._proto = ProtoFaceSave()
+        elif item == 5103:
+            msg._proto = ProtoFaceDel()
+        elif item == 5105:
+            msg._proto = ProtoFaceRec()
         elif item == 5110:
             msg._proto = ProtoPatternDet()
         elif item == 5120:
@@ -340,6 +348,81 @@ class ProtoFaceDet(ProtoData):
         info = json.loads(buf)
         self._code = info['code']
         self._result = info['result']
+        return True
+
+class ProtoFaceSave(ProtoData):
+    _cmdid = 5102
+
+    def __init__(self):
+        self._name = ''
+        self._result = 101
+
+    def pack_req(self):
+        data = {'item': self._cmdid, 'data': self._name}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        return True
+
+class ProtoFaceDel(ProtoData):
+    _cmdid = 5103
+
+    def __init__(self):
+        self._action_id = 0
+        self._result = 101
+        self._name = ''
+
+    def pack_req(self):
+        data = {'item': self._cmdid, 'data': self._name}
+        return data
+    
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        return True
+
+class ProtoFaceList(ProtoData):
+    _cmdid = 5101
+
+    def __init__(self):
+        self._action_id = 0
+        self._result = 101
+        self._data = None
+
+    def pack_req(self):
+        data = {'item': self._cmdid}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        if 'data' in info:
+            self._data = info['data']
+        return True
+
+class ProtoFaceRec(ProtoData):
+    _cmdid = 5105
+
+    def __init__(self):
+        self._action_id = 0
+        self._result = 101
+        self._data = None
+
+    def pack_req(self):
+        data = {'item': self._cmdid}
+        return data
+
+    def unpack_resp(self, buf):
+        info = json.loads(buf)
+        self._code = info['code']
+        self._result = info['result']
+        if 'data' in info:
+            self._data = info['data']
         return True
 
 
