@@ -1,7 +1,7 @@
 from . import action
 from . import protocol
-from . import robot
 from . import module
+import re
 
 
 class PatternDetAction(action.Action):
@@ -33,6 +33,45 @@ class FaceDetAction(action.Action):
         proto._timeout = self._timeout
         return proto
 
+class FaceSaveAction(action.Action):
+    _action_proto_cls = protocol.ProtoFaceSave
+
+    def __init__(self, name:str, **kw):
+        super().__init__(**kw)
+        self._name = name
+    
+    def encode(self):
+        proto = protocol.ProtoFaceSave()
+        proto._name = self._name
+        return proto
+
+class FaceDeleteAction(action.Action):
+    _action_proto_cls = protocol.ProtoFaceDel
+    def __init__(self, name:str, **kw):
+        super().__init__(**kw)
+        self._name = name
+    def encode(self):
+        proto = protocol.ProtoFaceDel()
+        proto._name = self._name
+        return proto
+
+class FaceListAction(action.Action):
+    _action_proto_cls = protocol.ProtoFaceList
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
+    def encode(self):
+        proto = protocol.ProtoFaceList()
+        return proto
+
+class FaceRecAction(action.Action):
+    _action_proto_cls = protocol.ProtoFaceRec
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
+    def encode(self):
+        proto = protocol.ProtoFaceRec()
+        return proto
 
 class ColorDetAction(action.Action):
     _action_proto_cls = protocol.ProtoColorDet
@@ -133,6 +172,56 @@ class Skill(module.Module):
         action = FaceDetAction(-1, timeout)
         self._action_dispatcher.send_action(action)
         return action.wait_for_completed()
+
+    def recognize_face(self):
+        """ 识别检测到的人脸身份
+        
+        :return：result (bool) - 识别出人脸身份为True，未识别出为False
+                 name (str) - 人脸姓名
+        """
+        action = FaceRecAction()
+        self._action_dispatcher.send_action(action)
+        result = action.wait_for_completed()
+        name = action._data
+        return result, name
+    
+    def save_face(self, name: str):
+        """ 录入人脸
+
+        :param str name: 待录入人脸的姓名
+        :return: 录入成功返回True，失败返回False
+        """
+        action = FaceSaveAction(name)
+        self._action_dispatcher.send_action(action)
+        return action.wait_for_completed()
+
+    def delete_face(self, name: str):
+        """ 删除人脸
+        
+        :param str name: 待删除人脸的姓名
+        :return: 删除成功返回True，失败返回False
+        """
+        action = FaceDeleteAction(name)
+        self._action_dispatcher.send_action(action)
+        return action.wait_for_completed()
+
+    def get_face_list(self):
+        """ 获取已保存的人脸列表
+
+        :param list face_list
+        :return: result (bool) - 获取成功返回True，失败返回False
+                 data (list) - 包含人脸编号和姓名的列表
+        """
+        result = False
+        data = []
+        action = FaceListAction()
+        self._action_dispatcher.send_action(action)
+        result = action.wait_for_completed()
+        if (action._data is not None):
+            data = re.split(r'[;s]s*', action._data)
+            if (data[-1] == ''):
+                data.pop()
+        return result, data
 
     def detect_pattern(self, id='A', timeout=1):
         """ 检测图案
