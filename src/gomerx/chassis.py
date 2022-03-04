@@ -1,37 +1,30 @@
+import time
 import threading
-from . import action
-from . import protocol
-from . import robot
 from . import module
-
-
-class ChassisAction(action.Action):
-    _action_proto_cls = protocol.ProtoChassisMove
-
-    def __init__(self, x=0, y=0, a=0, **kw):
-        super().__init__(**kw)
-        self._x = x
-        self._y = y
-        self._a = a
-
-    def encode(self):
-        proto = protocol.ProtoChassisMove()
-        proto._x = self._x
-        proto._y = self._y
-        proto._a = self._a
-        return proto
+from . import client
+from . import event
+from . import message
 
 
 class Chassis(module.Module):
-    def __init__(self, robot):
-        super().__init__(robot)
-        self._action_dispatcher = robot.action_dispatcher
+    def __init__(self, client: client.Client):
+        super().__init__(client)
+        self._auto_timer = None
+        self._running = False
+
+    def _auto_stop_timer(self, *args):
+        timeout = args[0]
+        time.sleep(timeout)
+        self.stop()
         self._auto_timer = None
 
-    def _auto_stop_timer(self):
-        self.drive_wheels(0, 0, 0, 0)
+    def stop(self):
+        if self._running:
+            self.client.send(message.Message(
+                message.ChassisWheel, [0, 0, 0, 0]))
+            self._running = False
 
-    def drive_wheels(self, lf=0, lb=0, rf=0, rb=0, timeout=10):
+    def drive_wheels(self, lf: int = 0, lb: int = 0, rf: int = 0, rb: int = 0, timeout: int = 10):
         """ 设置麦轮速度
 
         :param int lf: [-100 ~ 100], 左前轮
@@ -42,25 +35,20 @@ class Chassis(module.Module):
         :return: 设置麦轮速度, 设置成功返回 True, 设置失败返回 False
         :rtype: bool
         """
-        # TODO: 抛出InvalidParameter异常
-        if not(-100 <= lf <= 100) or not(-100 <= lb <= 100) or not(-100 <= rf <= 100) \
-                or not(-100 <= rb <= 100) or not(timeout > 0):
-            raise Exception("invalid parameter")
-        proto = protocol.ProtoSetWheelSpeed()
-        proto._lf = lf
-        proto._lb = lb
-        proto._rf = rf
-        proto._rb = rb
+        if abs(lf) > 100 or abs(lb) > 100 or abs(rf) > 100 or abs(rb) > 100:
+            raise Exception("lf, lb, rf, rb,value error")
         if timeout:
-            if self._auto_timer:
-                if self._auto_timer.is_alive():
-                    self._auto_timer.cancel()
-            self._auto_timer = threading.Timer(timeout, self._auto_stop_timer)
-            self._auto_timer.start()
-            return self._send_sync_proto(proto)
-        return self._send_async_proto(proto)
+            if self._auto_timer is None:
+                self._auto_timer = threading.Thread(
+                    target=self._auto_stop_timer, args=(timeout,))
+                self._auto_timer.setDaemon(True)
+                self._auto_timer.start()
+        msg = message.Message(
+            message.ChassisWheel, [lf, lb, rf, rb])
+        self._running = True
+        return self.send_msg(msg)
 
-    def move(self, x=0, y=0, a=0, wait_for_complete=True):
+    def move(self, x: int = 0, y: int = 0, a: int = 0, wait_for_complete=True) -> bool:
         """控制底盘运动当指定位置, 坐标轴原点为当前位置
 
         :param int x: [-160 ~ 160], x 轴向运动距离, 右为正值, 单位 cm
@@ -70,11 +58,15 @@ class Chassis(module.Module):
         :return: 移动到指定位置返回 True, 否则返回 False
         :rtype: bool
         """
-
-        if not(-160 <= x <= 160) or not(-160 <= y <= 160) or not(-180 <= a <= 180):
-            raise Exception("invalid parameter")
-        action = ChassisAction(x, y, a)
-        self._action_dispatcher.send_action(action)
+        if abs(x) > 160 or abs(y) > 160 or abs(a) > 180:
+            raise Exception("x,y,a,value error")
+        msg = message.Message(message.ChassisXYA, [x, y, a])
+        self.send_msg(msg)
         if wait_for_complete:
-            return action.wait_for_completed()
+            event.Dispatcher().send(msg)
+            move_result = 100
+            while move_result == 100:
+                time.sleep(0.1)
+                move_result = event.Dispatcher().get_msg(message.ChassisXYA).result
+            return (move_result == 102)
         return True

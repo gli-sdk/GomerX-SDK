@@ -1,30 +1,12 @@
-from . import protocol
 from . import module
-from . import action
-
-
-class ServoAction(action.Action):
-    _action_proto_cls = protocol.ProtoServoControl
-
-    def __init__(self, id=0, angle=0, **kw):
-        super().__init__(**kw)
-        self._id = id
-        self._value = angle
-        self._angle = 0
-
-    def encode(self):
-        proto = protocol.ProtoServoControl()
-        proto._id = self._id
-        proto._value = self._value
-        return proto
+from . import message
+from . import event
+import time
 
 
 class Servo(module.Module):
-    def __init__(self, robot):
-        super().__init__(robot)
-        self._action_dispatcher = robot.action_dispatcher
 
-    def move_to(self, id=0, angle=0, wait_for_complete=True):
+    def move_to(self, id: int = 0, angle: int = 90, wait_for_complete=True) -> bool:
         """舵机移动到绝对位置
 
         :param int id: [0, 1], 0:左侧舵机, 1:右侧舵机
@@ -33,18 +15,31 @@ class Servo(module.Module):
         :return: 舵机是否移到绝对位置, 移动成功返回 True, 否则返回 False
         :rtype: bool
         """
-        # TODO: 抛出InvalidParameter异常
-        if (id != 0 and id != 1) or not(0 <= angle <= 180):
-            raise Exception('invaild parameter')
-        if (id == 0 and angle < 85):
-            raise Exception('invaild servo-0 angle')
-        if (id == 1 and angle > 110):
-            raise Exception('invaild servo-1 angle')
-        action = ServoAction(id, angle)
-        self._action_dispatcher.send_action(action)
+        if id < 0 or id > 1:
+            raise Exception("id value error")
+        elif id == 0:
+            if angle < 85 or angle > 180:
+                raise Exception("angle value error")
+        else:
+            if angle < 0 or angle > 110:
+                raise Exception("angle value error")
+        dataint = [0xff, 0xff]
+        dataint[id] = angle
+        msg = message.Message(message.ArmServoAngle, dataint)
+        self.send_msg(msg)
         if wait_for_complete:
-            return action.wait_for_completed()
+            event.Dispatcher().send(msg)
+            result = 100
+            while result == 100:
+                time.sleep(0.1)
+                result = event.Dispatcher().get_msg(str(message.ArmServoAngle)).result
+            return (result == 102)
         return True
+
+    def reset(self):
+        self.move_to(id=0, angle=180, wait_for_complete=False)
+        self.move_to(id=1, angle=70, wait_for_complete=False)
+        time.sleep(1)
 
     def get_angle(self, id=0):
         """获取舵机角度值
@@ -53,19 +48,4 @@ class Servo(module.Module):
         :return: 舵机角度
         :rtype: int
         """
-
-        if (id != 0 and id != 1):
-            raise Exception('invaild parameter')
-        proto = protocol.ProtoServoGetAngle()
-        proto._id = id
-        msg = protocol.Message(proto)
-        try:
-            resp_msg = self._client.send_sync_msg(msg)
-            if resp_msg:
-                proto = resp_msg.get_proto()
-                angle = proto._angle
-                return angle
-            else:
-                return False
-        except Exception as e:
-            return False
+        pass
