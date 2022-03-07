@@ -25,9 +25,6 @@ class Robot(object):
         self.chassis.stop()
         self.client.disconnect()
 
-    def close(self):
-        self.client.disconnect()
-
     @property
     def client(self):
         return self._client
@@ -66,3 +63,35 @@ class Robot(object):
     def arm(self):
         """ 获取机械臂对象 """
         return self._arm
+
+    @property
+    def name(self):
+        return self._name
+
+    def close(self):
+        """ 关闭机器人连接 """
+        self.client.disconnect()
+
+    def get_version(self):
+        """ 获取机器人固件版本号
+
+          :return: 如："1.0.0"
+          :rtype: str
+        """
+        return self.client.version
+
+    def get_sn(self):
+        """ 获取机器人序列号SN
+
+        :return: SN字符串, 如: GomerX2019010100A
+        :rtype: str
+        """
+        return ''
+
+    def get_battery(self):
+        """ 获取机器人电量
+
+        : return: [0 ~ 100], 返回机器人剩余电量百分比
+        : rtype: int
+        """
+        return min(100, self.client.battery)

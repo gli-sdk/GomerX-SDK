@@ -38,6 +38,8 @@ class Client(object):
         self.searchSocket = None
         self.mode = mode
         self.robot = robot
+        self.battery = 0
+        self.version = '0.0.0'
 
         self.halfMessage = ''
 
@@ -116,7 +118,8 @@ class Client(object):
             r = message.Message(message=data.decode())
             if r.isTypeOf(message.Connect):
                 connected = True
-
+                self.battery = r.device.battery
+                self.version = r.device.version
             time.sleep(0.05)
         if not connected:
             raise RobotConnectFailed
