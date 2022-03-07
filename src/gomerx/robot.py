@@ -25,6 +25,9 @@ class Robot(object):
         self.chassis.stop()
         self.client.disconnect()
 
+    def close(self):
+        self.client.disconnect()
+
     @property
     def client(self):
         return self._client
