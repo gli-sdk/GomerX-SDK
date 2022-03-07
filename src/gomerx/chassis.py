@@ -70,3 +70,18 @@ class Chassis(module.Module):
                 move_result = event.Dispatcher().get_msg(message.ChassisXYA).result
             return (move_result == 102)
         return True
+
+    def move_forward(self, y=0, wait_for_complete=True):
+        return self.move(y=y, wait_for_complete=wait_for_complete)
+
+    def move_backward(self, y=0, wait_for_complete=True):
+        return self.move(y=-y, wait_for_complete=wait_for_complete)
+
+    def move_left(self, x=0, wait_for_complete=True):
+        return self.move(x=-x, wait_for_complete=wait_for_complete)
+
+    def move_right(self, x=0, wait_for_complete=True):
+        return self.move(x=x, wait_for_complete=wait_for_complete)
+
+    def rotate(self, a=0, wait_for_complete=True):
+        self.rotate(a=a, wait_for_complete=wait_for_complete)
