@@ -1,5 +1,6 @@
 from ctypes import *
 import os
+import threading
 import numpy as np
 import cv2 as cv
 from .client import Client
@@ -22,6 +23,18 @@ class Camera(Module):
         Camera._yuv = string_at(yuv_data, int(w * h * 3 / 2))
         return 0
 
+    def play_video(self):
+        win_name = "gomerx"
+        cv.namedWindow(win_name, cv.WINDOW_GUI_NORMAL)
+        while self._display:
+            img = self.read_cv_image()
+            if img is not None:
+                cv.imshow(win_name, img)
+                if cv.waitKey(1) == 27:
+                    break
+        cv.destroyAllWindows()
+        self.stop_video_stream()
+
     def start_video_stream(self, display=True):
         """ 开启视频流
 
@@ -33,6 +46,10 @@ class Camera(Module):
         self._display = display
         self.client.send(message.Message(message.Video, [1]))
         self._dll.CreateGvideo(self.recv_video_data)
+        video_thread = threading.Thread(target=self.play_video)
+        video_thread.setDaemon(True)
+        video_thread.start()
+        return True
 
     def stop_video_stream(self):
         """ 停止视频流
@@ -40,8 +57,10 @@ class Camera(Module):
         :return: 视频流是否停止, 视频停止返回 True, 视频未停止返回 False
         :rtype: bool
         """
+        self._display = False
         self._dll.DestroyGvideo()
         self.client.send(message.Message(message.Video, [0]))
+        return True
 
     def read_cv_image(self):
         """读取一帧opencv-bgr格式的图片
