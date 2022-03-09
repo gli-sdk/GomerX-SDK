@@ -32,8 +32,6 @@ class Client(object):
     tcpRecvQueue = Queue()
     _instance_lock = threading.Lock()
 
-    _yuv = None
-
     def __init__(self, robot: str, mode=AP) -> None:
         self.searchSocket = None
         self.mode = mode
@@ -54,8 +52,6 @@ class Client(object):
 
         self.search()
         self.connect()
-
-        self._cap = cv2.VideoCapture()
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(Client, "_instance"):
@@ -269,16 +265,3 @@ class Client(object):
                 data, addr = self.fileSocket.recv(Client.BufSize)
                 size -= len(data)
                 f.write(data)
-
-    def open_video(self, display=True):
-        print('client: open video')
-        self.send(message.Message(message.Video, [1]))
-        url = 'rtp://' + self.serverIP + ':' + str(Client.VideoPort)
-        print(url)
-        ret = self._cap.open(url)
-        print("ret=", ret)
-
-    def close_video(self, display=True):
-        print('client: close video')
-        self._cap.release()
-        self.send(message.Message(message.Video, [0]))
