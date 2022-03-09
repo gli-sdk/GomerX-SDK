@@ -25,7 +25,7 @@ class Camera(Module):
 
     def play_video(self):
         win_name = "gomerx"
-        cv.namedWindow(win_name, cv.WINDOW_GUI_NORMAL)
+        cv.namedWindow(win_name, cv.WINDOW_AUTOSIZE)
         while self._display:
             img = self.read_cv_image()
             if img is not None:
@@ -46,9 +46,10 @@ class Camera(Module):
         self._display = display
         self.client.send(message.Message(message.Video, [1]))
         self._dll.CreateGvideo(self.recv_video_data)
-        video_thread = threading.Thread(target=self.play_video)
-        video_thread.setDaemon(True)
-        video_thread.start()
+        if display:
+            video_thread = threading.Thread(target=self.play_video)
+            video_thread.setDaemon(True)
+            video_thread.start()
         return True
 
     def stop_video_stream(self):
