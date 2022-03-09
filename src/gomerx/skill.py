@@ -40,38 +40,38 @@ class Skill(module.Module):
         else:
             return False, []
 
-    def recognize_face(self):
+    def recognize_face(self) -> tuple:
         """ 识别检测到的人脸身份
 
         :return: result (bool) - 识别出人脸身份为True, 未识别出为False
                  name (str) - 人脸姓名
         """
-        pass
+        return False, ''
 
-    def save_face(self):
+    def save_face(self, name: str) -> bool:
         """ 录入人脸
 
         :param str name: 待录入人脸的姓名
         :return: 录入成功返回True, 失败返回False
         """
-        pass
+        return False
 
-    def delete_face(self, name: str):
+    def delete_face(self, name: str) -> bool:
         """ 删除人脸
 
         :param str name: 待删除人脸的姓名
         :return: 删除成功返回True, 失败返回False
         """
-        pass
+        return False
 
-    def get_face_list(self):
+    def get_face_list(self) -> tuple:
         """ 获取已保存的人脸列表
 
         :param list face_list
         :return: result (bool) - 获取成功返回True, 失败返回False
                  data (list) - 包含人脸编号和姓名的列表
         """
-        pass
+        return False, []
 
     def detect_pattern(self, id: str = 'A', timeout: int = 1) -> bool:
         """ 检测图案
