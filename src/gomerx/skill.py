@@ -163,12 +163,11 @@ class Skill(module.Module):
             detline_result = event.Dispatcher().get_msg(message.DetColor).result
         if detline_result == 102:
             color_coordinate = event.Dispatcher().get_msg(message.DetColor).dataint
-            print(color_coordinate)
             return True, color_coordinate
         else:
             return False, []
 
-    def detect_line(self, hsv_low: tuple = (0, 0, 0), hsv_high: tuple = (360, 100, 100), timeout: int = 1) -> bool:
+    def detect_line(self, hsv_low: tuple = (0, 0, 0), hsv_high: tuple = (360, 100, 100), timeout: int = 1) -> tuple:
         """ 检测线段
 
         :param tuple hsv_low: hsv颜色下边界
@@ -194,9 +193,10 @@ class Skill(module.Module):
             time.sleep(0.1)
             detline_result = event.Dispatcher().get_msg(message.DetLine).result
         if detline_result == 102:
-            return True
+            coordinate = event.Dispatcher().get_msg(message.DetLine).dataint
+            return True, coordinate
         else:
-            return False
+            return False, []
 
     def move_along_line(self, stop=LINE_END) -> bool:
         """ 自动巡线直到线段消失, 使用前需先使用detect_line方法
