@@ -109,4 +109,5 @@ if __name__ == '__main__':
             cv.imshow(WINDOW_NAME, ration_image)
             if cv.waitKey(1) == 27:
                 break
+    my_camera.stop_video_stream()
     cv.destroyAllWindows()

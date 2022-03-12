@@ -24,7 +24,7 @@ class Chassis(module.Module):
                 message.ChassisWheel, [0, 0, 0, 0]))
             self._running = False
 
-    def drive_wheels(self, lf: int = 0, lb: int = 0, rf: int = 0, rb: int = 0, timeout: int = 10):
+    def drive_wheels(self, lf: int = 0, lb: int = 0, rf: int = 0, rb: int = 0, timeout: int = 10) -> bool:
         """ 设置麦轮速度
 
         :param int lf: [-100 ~ 100], 左前轮

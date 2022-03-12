@@ -11,7 +11,7 @@ EFFECT_BREATH = 'breath'
 
 class Led(module.Module):
 
-    def set_led(self, color: tuple = (0, 0, 0), effect: str = EFFECT_ON, T: int = 1000):
+    def set_led(self, color: tuple = (0, 0, 0), effect: str = EFFECT_ON, T: int = 1000) -> bool:
         """设置灯光颜色和显示模式
 
         :param tuple color: color=(R, G, B), 灯光颜色采用RGB模型组成. R:[0~255], 红色光分量, G:[0~255], 绿色光分量, B:[0~255], 蓝色光分量
