@@ -23,7 +23,7 @@ class Skill(module.Module):
         """ 检测人脸
 
         :param int timeout: 超时时间, 单位 s
-        :return: result (bool) - 检测到人脸返回True,未检测到返回False \n
+        :return: result (bool) - 检测到人脸返回True, 未检测到返回False 
                  data (list) - result为True时, 返回最大人脸中心坐标及宽高[x, y, w, h]
         :rtype: tuple
         """
@@ -82,8 +82,8 @@ class Skill(module.Module):
     def detect_pattern(self, id: str = 'A', timeout: int = 1) -> bool:
         """ 检测图案
 
-        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int timeout: 超时时间，单位 s
+        :param str id: 图案名称, 支持'A'~'Z', '0'~'9'
+        :param int timeout: 超时时间, 单位 s
         :return: 检测到指定图案返回True, 未检测到返回False
         :rtype: bool
         """
@@ -102,8 +102,8 @@ class Skill(module.Module):
     def detect_qrcode(self, timeout: int = 1) -> tuple:
         """ 检测二维码
 
-        :param int timeout: 超时时间，单位 s
-        :return: result (bool) - 检测到二维码返回True, 未检测到返回False \n
+        :param int timeout: 超时时间, 单位 s
+        :return: result (bool) - 检测到二维码返回True, 未检测到返回False 
                  data (str) - result为True时, 返回二维码字符串信息
         :rtype: tuple
         """
@@ -125,9 +125,9 @@ class Skill(module.Module):
     def move_to_pattern(self, id: str = 'A', x: int = 0, y: int = 13) -> bool:
         """ 移动至图案前指定位置
 
-        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int x: 停止时，图案中心线与机器人中心线左右距离, 范围[-0.4 * y, 0.4 * y], 图案在机器人右侧为正，单位cm
-        :param int y: 停止时，图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
+        :param str id: 图案名称, 支持'A'~'Z', '0'~'9'
+        :param int x: 停止时, 图案中心线与机器人中心线左右距离, 范围[-0.4 * y, 0.4 * y], 图案在机器人右侧为正, 单位cm
+        :param int y: 停止时, 图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
         :return: 成功移动到图案前指定位置返回True, 失败返回False
         :rtype: bool
         """
@@ -150,8 +150,8 @@ class Skill(module.Module):
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timeout: 超时时间，单位 s
-        :return: result (bool) - 检测到色块返回True, 未检测到返回False \n
+        :param int timeout: 超时时间, 单位 s
+        :return: result (bool) - 检测到色块返回True, 未检测到返回False 
                  data (list) - result为True时, 返回色块中心坐标及宽高[x, y, w, h]
         :rtype: tuple
         """
@@ -182,8 +182,8 @@ class Skill(module.Module):
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timeout: 超时时间，单位 s
-        :return: result (bool) - 检测到线段返回True, 未检测到返回False \n
+        :param int timeout: 超时时间, 单位 s
+        :return: result (bool) - 检测到线段返回True, 未检测到返回False
                  data (list) - result为True时, 返回线段起点和终点坐标[x0, y0, x1, y1]
         :rtype: tuple
         """
