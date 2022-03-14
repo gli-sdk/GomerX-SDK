@@ -18,7 +18,6 @@ class Dispatcher(object):
         pass
 
     def send(self, msg: message.Message):
-        print("send")
         key = str(msg.type)
         if key in self._in_progress:
             self._in_progress_mutex.acquire()
@@ -32,7 +31,6 @@ class Dispatcher(object):
         key = str(msg.type)
         if key in self._in_progress:
             self._in_progress_mutex.acquire()
-            print("recv result: ", msg.result)
             self._in_progress[key].result = msg.result
             self._in_progress[key].dataint = msg.dataint
             self._in_progress[key].datastr = msg.datastr

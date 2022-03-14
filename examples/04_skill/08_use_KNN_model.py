@@ -76,11 +76,14 @@ if __name__ == '__main__':
                 my_gripper = my_robot.gripper
                 my_gripper.close()
                 my_gripper.open()
+                break
             elif classes_dict[3] >= 9:
                 # 如果是第三类，则动一动机械臂
                 my_arm = my_robot.arm
                 my_arm.move_to(12, 10)
                 my_arm.move_to(12, 15)
+                break
             else:
                 # 如果是其他情况则保持不动
                 continue
+    my_camera.stop_video_stream()

@@ -84,4 +84,4 @@ class Chassis(module.Module):
         return self.move(x=x, wait_for_complete=wait_for_complete)
 
     def rotate(self, a=0, wait_for_complete=True):
-        self.rotate(a=a, wait_for_complete=wait_for_complete)
+        self.move(a=a, wait_for_complete=wait_for_complete)
