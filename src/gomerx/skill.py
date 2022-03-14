@@ -23,7 +23,7 @@ class Skill(module.Module):
         """ 检测人脸
 
         :param int timeout: 超时时间, 单位 s
-        :return: result (bool) - 检测到人脸返回True, 未检测到返回False 
+        :return: result (bool) - 检测到人脸返回True, 未检测到返回False  \n
                  data (list) - result为True时, 返回最大人脸中心坐标及宽高[x, y, w, h]
         :rtype: tuple
         """
@@ -45,7 +45,7 @@ class Skill(module.Module):
     def recognize_face(self) -> tuple:
         """ 识别检测到的人脸身份
 
-        :return: result (bool) - 识别出人脸身份为True, 未识别出为False
+        :return: result (bool) - 识别出人脸身份为True, 未识别出为False \n
                  name (str) - 人脸姓名
         :rtype: tuple
         """
@@ -72,8 +72,8 @@ class Skill(module.Module):
     def get_face_list(self) -> tuple:
         """ 获取已保存的人脸列表
 
-        :param list face_list
-        :return: result (bool) - 获取成功返回True, 失败返回False
+        :param list: face_list
+        :return: result (bool) - 获取成功返回True, 失败返回False \n
                  data (list) - 包含人脸编号和姓名的列表
         :rtype: tuple
         """
@@ -103,7 +103,7 @@ class Skill(module.Module):
         """ 检测二维码
 
         :param int timeout: 超时时间, 单位 s
-        :return: result (bool) - 检测到二维码返回True, 未检测到返回False 
+        :return: result (bool) - 检测到二维码返回True, 未检测到返回False \n
                  data (str) - result为True时, 返回二维码字符串信息
         :rtype: tuple
         """
@@ -151,7 +151,7 @@ class Skill(module.Module):
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
         :param int timeout: 超时时间, 单位 s
-        :return: result (bool) - 检测到色块返回True, 未检测到返回False 
+        :return: result (bool) - 检测到色块返回True, 未检测到返回False \n
                  data (list) - result为True时, 返回色块中心坐标及宽高[x, y, w, h]
         :rtype: tuple
         """
@@ -183,7 +183,7 @@ class Skill(module.Module):
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
         :param int timeout: 超时时间, 单位 s
-        :return: result (bool) - 检测到线段返回True, 未检测到返回False
+        :return: result (bool) - 检测到线段返回True, 未检测到返回False \n
                  data (list) - result为True时, 返回线段起点和终点坐标[x0, y0, x1, y1]
         :rtype: tuple
         """
@@ -211,7 +211,8 @@ class Skill(module.Module):
 
     def move_along_line(self, stop=LINE_END) -> bool:
         """ 自动巡线直到线段消失, 使用前需先使用detect_line方法
-
+        
+        :param stop: 停止条件, 'end': 线段结束, 'cross': 岔路口
         :return: 巡线结束返回True, 异常返回False
         :rtype: bool
         """
