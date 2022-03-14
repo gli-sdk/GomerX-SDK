@@ -23,7 +23,9 @@ class Skill(module.Module):
         """ 检测人脸
 
         :param int timeout: 超时时间, 单位 s
-        :return: 检测到人脸返回True, 未检测到返回False
+        :return: result (bool) - 检测到人脸返回True, 未检测到返回False  \n
+                 data (list) - result为True时, 返回最大人脸中心坐标及宽高[x, y, w, h]
+        :rtype: tuple
         """
         msg = message.Message(
             message.DetFace, [timeout])
@@ -43,8 +45,9 @@ class Skill(module.Module):
     def recognize_face(self) -> tuple:
         """ 识别检测到的人脸身份
 
-        :return: result (bool) - 识别出人脸身份为True, 未识别出为False
+        :return: result (bool) - 识别出人脸身份为True, 未识别出为False \n
                  name (str) - 人脸姓名
+        :rtype: tuple
         """
         return False, ''
 
@@ -53,6 +56,7 @@ class Skill(module.Module):
 
         :param str name: 待录入人脸的姓名
         :return: 录入成功返回True, 失败返回False
+        :rtype: bool
         """
         return False
 
@@ -61,24 +65,27 @@ class Skill(module.Module):
 
         :param str name: 待删除人脸的姓名
         :return: 删除成功返回True, 失败返回False
+        :rtype: bool
         """
         return False
 
     def get_face_list(self) -> tuple:
         """ 获取已保存的人脸列表
 
-        :param list face_list
-        :return: result (bool) - 获取成功返回True, 失败返回False
+        :param list: face_list
+        :return: result (bool) - 获取成功返回True, 失败返回False \n
                  data (list) - 包含人脸编号和姓名的列表
+        :rtype: tuple
         """
         return False, []
 
     def detect_pattern(self, id: str = 'A', timeout: int = 1) -> bool:
         """ 检测图案
 
-        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int timeout: 超时时间，单位 s
+        :param str id: 图案名称, 支持'A'~'Z', '0'~'9'
+        :param int timeout: 超时时间, 单位 s
         :return: 检测到指定图案返回True, 未检测到返回False
+        :rtype: bool
         """
         if id not in Skill.PATTERN_STR:
             raise Exception("id value error")
@@ -95,9 +102,10 @@ class Skill(module.Module):
     def detect_qrcode(self, timeout: int = 1) -> tuple:
         """ 检测二维码
 
-        :param int timeout: 超时时间，单位 s
+        :param int timeout: 超时时间, 单位 s
         :return: result (bool) - 检测到二维码返回True, 未检测到返回False \n
                  data (str) - result为True时, 返回二维码字符串信息
+        :rtype: tuple
         """
         msg = message.Message(
             message.DetQrCode, [timeout])
@@ -117,10 +125,11 @@ class Skill(module.Module):
     def move_to_pattern(self, id: str = 'A', x: int = 0, y: int = 13) -> bool:
         """ 移动至图案前指定位置
 
-        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int x: 停止时，图案中心线与机器人中心线左右距离, 范围[-30, 30], 图案在机器人右侧为正，单位cm
-        :param int y: 停止时，图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
+        :param str id: 图案名称, 支持'A'~'Z', '0'~'9'
+        :param int x: 停止时, 图案中心线与机器人中心线左右距离, 范围[-0.4 * y, 0.4 * y], 图案在机器人右侧为正, 单位cm
+        :param int y: 停止时, 图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
         :return: 成功移动到图案前指定位置返回True, 失败返回False
+        :rtype: bool
         """
         if y < 13 or y > 60 or x > abs(round(0.4 * y)):
             raise Exception("x , y value error")
@@ -141,9 +150,10 @@ class Skill(module.Module):
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timeout: 超时时间，单位 s
+        :param int timeout: 超时时间, 单位 s
         :return: result (bool) - 检测到色块返回True, 未检测到返回False \n
                  data (list) - result为True时, 返回色块中心坐标及宽高[x, y, w, h]
+        :rtype: tuple
         """
         if hsv_low[0] > hsv_high[0] or hsv_low[1] > hsv_high[1] or hsv_low[2] > hsv_high[2]:
             raise Exception("hsv value error")
@@ -172,9 +182,10 @@ class Skill(module.Module):
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timeout: 超时时间，单位 s
+        :param int timeout: 超时时间, 单位 s
         :return: result (bool) - 检测到线段返回True, 未检测到返回False \n
                  data (list) - result为True时, 返回线段起点和终点坐标[x0, y0, x1, y1]
+        :rtype: tuple
         """
         if hsv_low[0] > hsv_high[0] or hsv_low[1] > hsv_high[1] or hsv_low[2] > hsv_high[2]:
             raise Exception("hsv value error")
@@ -200,8 +211,10 @@ class Skill(module.Module):
 
     def move_along_line(self, stop=LINE_END) -> bool:
         """ 自动巡线直到线段消失, 使用前需先使用detect_line方法
-
+        
+        :param stop: 停止条件, 'end': 线段结束, 'cross': 岔路口
         :return: 巡线结束返回True, 异常返回False
+        :rtype: bool
         """
         if stop not in ROAD_TYPE:
             raise Exception(" ROAD_TYPE error")

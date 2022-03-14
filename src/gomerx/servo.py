@@ -37,11 +37,12 @@ class Servo(module.Module):
         return True
 
     def reset(self):
+        """舵机恢复初始位置"""
         self.move_to(id=0, angle=180, wait_for_complete=False)
         self.move_to(id=1, angle=70, wait_for_complete=False)
         time.sleep(1)
 
-    def get_angle(self, id=0):
+    def get_angle(self, id=0) -> int:
         """获取舵机角度值
 
         :param int id: [0, 1], 0:左侧舵机, 1:右侧舵机

@@ -9,8 +9,8 @@ class Arm(module.Module):
     def move_to(self, y: int = 0, z: int = 0, wait_for_complete=True) -> bool:
         """ 机械臂移动到绝对位置
 
-        :param int x: x轴坐标, 单位cm
-        :param int y: y轴坐标, 单位cm
+        :param int y: 机械手中心距离车体前平面距离, 单位cm
+        :param int z: 机械手中心距离地面高度, 单位cm
         :param bool wait_for_complete: 是否等待执行完成, 默认为 True
         :return: 机械臂是否移到绝对位置, 完成返回 True, 未完成返回 False
         :rtype: bool
@@ -28,7 +28,7 @@ class Arm(module.Module):
             return (result == 102)
         return True
 
-    def recenter(self, wait_for_complete=True):
+    def recenter(self, wait_for_complete=True) -> bool:
         """机械臂回中
 
         :param bool wait_for_complete: 是否等待执行完成, 默认为 True
@@ -38,6 +38,12 @@ class Arm(module.Module):
         return self.move_to(10, 13, wait_for_complete)
 
     def calibrate(self, wait_for_complete=True) -> bool:
+        """机械臂标定
+
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        :return: 机械臂标定是否完成, 完成返回 True, 否则返回 False
+        :rtype: bool
+        """
         msg = message.Message(message.ArmCalib)
         event.Dispatcher().send(msg)
         self.send_msg(msg)

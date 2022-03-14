@@ -35,7 +35,7 @@ class Camera(Module):
         cv.destroyAllWindows()
         self.stop_video_stream()
 
-    def start_video_stream(self, display=True):
+    def start_video_stream(self, display=True) -> bool:
         """ 开启视频流
 
         :param display: 是否显示视频, 默认为 True
@@ -52,7 +52,7 @@ class Camera(Module):
             video_thread.start()
         return True
 
-    def stop_video_stream(self):
+    def stop_video_stream(self) -> bool:
         """ 停止视频流
 
         :return: 视频流是否停止, 视频停止返回 True, 视频未停止返回 False
@@ -63,7 +63,7 @@ class Camera(Module):
         self.client.send(message.Message(message.Video, [0]))
         return True
 
-    def read_cv_image(self):
+    def read_cv_image(self) -> np.array:
         """读取一帧opencv-bgr格式的图片
 
         :return: 返回一张图片, 分辨率为 800x600

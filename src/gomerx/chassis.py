@@ -24,7 +24,7 @@ class Chassis(module.Module):
                 message.ChassisWheel, [0, 0, 0, 0]))
             self._running = False
 
-    def drive_wheels(self, lf: int = 0, lb: int = 0, rf: int = 0, rb: int = 0, timeout: int = 10):
+    def drive_wheels(self, lf: int = 0, lb: int = 0, rf: int = 0, rb: int = 0, timeout: int = 10) -> bool:
         """ 设置麦轮速度
 
         :param int lf: [-100 ~ 100], 左前轮
@@ -84,4 +84,4 @@ class Chassis(module.Module):
         return self.move(x=x, wait_for_complete=wait_for_complete)
 
     def rotate(self, a=0, wait_for_complete=True):
-        self.rotate(a=a, wait_for_complete=wait_for_complete)
+        self.move(a=a, wait_for_complete=wait_for_complete)
