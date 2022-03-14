@@ -75,8 +75,8 @@ class Robot(object):
     def get_version(self) -> str:
         """ 获取机器人固件版本号
 
-          :return: 如："1.0.0"
-          :rtype: str
+        :return: 如："1.0.0"
+        :rtype: str
         """
         return self.client.version
 

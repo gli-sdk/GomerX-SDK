@@ -63,7 +63,7 @@ class Camera(Module):
         self.client.send(message.Message(message.Video, [0]))
         return True
 
-    def read_cv_image(self) -> np:
+    def read_cv_image(self) -> np.array:
         """读取一帧opencv-bgr格式的图片
 
         :return: 返回一张图片, 分辨率为 800x600

@@ -9,8 +9,8 @@ class Arm(module.Module):
     def move_to(self, y: int = 0, z: int = 0, wait_for_complete=True) -> bool:
         """ 机械臂移动到绝对位置
 
-        :param int y: 机械臂末端前后位置, 单位cm
-        :param int z: 机械臂末端上下位置, 单位cm
+        :param int y: 机械手中心距离车体前平面距离, 单位cm
+        :param int z: 机械手中心距离地面高度, 单位cm
         :param bool wait_for_complete: 是否等待执行完成, 默认为 True
         :return: 机械臂是否移到绝对位置, 完成返回 True, 未完成返回 False
         :rtype: bool
