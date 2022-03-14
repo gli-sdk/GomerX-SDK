@@ -37,9 +37,7 @@ class Servo(module.Module):
         return True
 
     def reset(self):
-        """舵机恢复初始位置
-
-        """
+        """舵机恢复初始位置"""
         self.move_to(id=0, angle=180, wait_for_complete=False)
         self.move_to(id=1, angle=70, wait_for_complete=False)
         time.sleep(1)
