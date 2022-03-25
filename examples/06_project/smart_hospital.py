@@ -55,8 +55,6 @@ def put_down(robot: robot.Robot):
     robot.servo.reset()
 
 
-
-
 def clean_garbage(robot: robot.Robot):
     print("清理垃圾......")
     rubbish_id = ''
@@ -64,14 +62,13 @@ def clean_garbage(robot: robot.Robot):
     robot.arm.move_to(y=12, z=15)
     robot.gripper.open()
     robot.chassis.move_forward(y=10)
-    # drive_line(robot, line_stop=LINE_CROSS)
     if robot.skill.detect_line(hsv_low=LINE_COLOR_LOW, hsv_high=LINE_COLOR_HIGH):
         print("识别到线段")
         robot.skill.move_along_line(stop=LINE_CROSS)
     else:
         print("没有识别到线段")
         robot.chassis.move_to_left(x=25)
-        robot.chassis.advance(60)
+        robot.chassis.move_forward(60)
     # 区分垃圾
     if robot.skill.detect_pattern(id=HOUSEHOLD_WASTE, timeout=1):
         print("发现生活垃圾")
@@ -90,14 +87,14 @@ def clean_garbage(robot: robot.Robot):
         grab(robot)
         robot.arm.move_to(y=12, z=15)
         robot.chassis.rotate(a=90)
-        robot.chassis.retreat(y=10)
+        robot.chassis.move_backward(y=10)
         # 放置到对应垃圾桶中
         if robot.skill.detect_pattern(id=rubbish_bin_id):
             print("找到垃圾桶")
             robot.skill.move_to_pattern(id=rubbish_bin_id, y=14)
-            robot.chassis.advance(y=4)
+            robot.chassis.move_forward(y=4)
             robot.gripper.open()
-            robot.chassis.retreat(y=15)
+            robot.chassis.move_backward(y=15)
             robot.servo.reset()
             if rubbish_bin_id == HOUSEHOLD_TRASH:
                 robot.chassis.move_right(x=30)
