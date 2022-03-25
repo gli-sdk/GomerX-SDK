@@ -37,6 +37,8 @@ class Chassis(module.Module):
         """
         if abs(lf) > 100 or abs(lb) > 100 or abs(rf) > 100 or abs(rb) > 100:
             raise Exception("lf, lb, rf, rb,value error")
+        if timeout < 1:
+            raise Exception("timeout value error")
         if timeout:
             if self._auto_timer is None:
                 self._auto_timer = threading.Thread(
@@ -49,7 +51,7 @@ class Chassis(module.Module):
         return self.send_msg(msg)
 
     def move(self, x: int = 0, y: int = 0, a: int = 0, wait_for_complete=True) -> bool:
-        """控制底盘运动当指定位置, 坐标轴原点为当前位置
+        """ 控制底盘运动到指定位置, 坐标轴原点为当前位置
 
         :param int x: [-160 ~ 160], x 轴向运动距离, 右为正值, 单位 cm
         :param int y: [-160 ~ 160], y 轴向运动距离, 前为正值, 单位 cm
@@ -72,16 +74,49 @@ class Chassis(module.Module):
         return True
 
     def move_forward(self, y=0, wait_for_complete=True):
+        """ 控制底盘前进到指定位置, 坐标轴原点为当前位置
+
+        :param int y: [0 ~ 160], 车体前进运动距离, 为正值, 单位 cm
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        """
+        if y > 160 or y < 0:
+            raise Exception("y value error")
         return self.move(y=y, wait_for_complete=wait_for_complete)
 
     def move_backward(self, y=0, wait_for_complete=True):
+        """ 控制底盘后退到指定位置, 坐标轴原点为当前位置
+
+        :param int y: [0 ~ 160], 车体后退运动距离, 为正值, 单位 cm
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        """
+        if y > 160 or y < 0:
+            raise Exception("y value error")
         return self.move(y=-y, wait_for_complete=wait_for_complete)
 
     def move_left(self, x=0, wait_for_complete=True):
+        """ 控制底盘向左平移到指定位置, 坐标轴原点为当前位置
+
+        :param int x: [0 ~ 160], 向左平移运动距离, 为正值, 单位 cm
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        """
+        if x > 160 or x < 0:
+            raise Exception("x value error")
         return self.move(x=-x, wait_for_complete=wait_for_complete)
 
     def move_right(self, x=0, wait_for_complete=True):
+        """ 控制底盘向右平移到指定位置, 坐标轴原点为当前位置
+
+        :param int x: [0 ~ 160], 向右平移运动距离, 右为正值, 单位 cm
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        """
+        if x > 160 or x < 0:
+            raise Exception("x value error")
         return self.move(x=x, wait_for_complete=wait_for_complete)
 
     def rotate(self, a=0, wait_for_complete=True):
+        """ 控制底盘旋转到指定角度, 坐标轴原点为当前位置
+
+        :param int a: [-180 ~ 180], 车体旋转角度, 右为正值, 单位 °
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        """
         self.move(a=a, wait_for_complete=wait_for_complete)

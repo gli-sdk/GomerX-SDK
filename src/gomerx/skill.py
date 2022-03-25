@@ -27,6 +27,8 @@ class Skill(module.Module):
                  data (list) - result为True时, 返回最大人脸中心坐标及宽高[x, y, w, h]
         :rtype: tuple
         """
+        if timeout < 1:
+            raise Exception("timeout value error")
         msg = message.Message(
             message.DetFace, [timeout])
         self.send_msg(msg)
@@ -89,6 +91,8 @@ class Skill(module.Module):
         """
         if id not in Skill.PATTERN_STR:
             raise Exception("id value error")
+        if timeout < 1:
+            raise Exception("timeout value error")
         msg = message.Message(
             message.DetPattern, [timeout], id)
         self.send_msg(msg)
@@ -107,6 +111,8 @@ class Skill(module.Module):
                  data (str) - result为True时, 返回二维码字符串信息
         :rtype: tuple
         """
+        if timeout < 1:
+            raise Exception("timeout value error")
         msg = message.Message(
             message.DetQrCode, [timeout])
         self.send_msg(msg)
@@ -126,8 +132,8 @@ class Skill(module.Module):
         """ 移动至图案前指定位置
 
         :param str id: 图案名称, 支持'A'~'Z', '0'~'9'
-        :param int x: 停止时, 图案中心线与机器人中心线左右距离, 范围[-0.4 * y, 0.4 * y], 图案在机器人右侧为正, 单位cm
-        :param int y: 停止时, 图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
+        :param int x: 停止时, 图案中心线与机器人中心线左右距离, 范围[-0.4 * y ~ 0.4 * y], 图案在机器人右侧为正, 单位cm
+        :param int y: 停止时, 图案处于机器人摄像头平面前方距离, 范围[13 ~ 60], 单位cm
         :return: 成功移动到图案前指定位置返回True, 失败返回False
         :rtype: bool
         """
@@ -161,6 +167,8 @@ class Skill(module.Module):
             raise Exception("hsv value error")
         if hsv_high[1] > 100 or hsv_high[2] > 100:
             raise Exception("hsv value error")
+        if timeout < 1:
+            raise Exception("timeout value error")
         opencv_hsv_low = Skill._hsv_in_cv(hsv_low)
         opencv_hsv_high = Skill._hsv_in_cv(hsv_high)
         msg = message.Message(
@@ -193,6 +201,8 @@ class Skill(module.Module):
             raise Exception("hsv value error")
         if hsv_high[1] > 100 or hsv_high[2] > 100:
             raise Exception("hsv value error")
+        if timeout < 1:
+            raise Exception("timeout value error")
         opencv_hsv_low = Skill._hsv_in_cv(hsv_low)
         opencv_hsv_high = Skill._hsv_in_cv(hsv_high)
         msg = message.Message(
@@ -211,7 +221,7 @@ class Skill(module.Module):
 
     def move_along_line(self, stop=LINE_END) -> bool:
         """ 自动巡线直到线段消失, 使用前需先使用detect_line方法
-        
+
         :param stop: 停止条件, 'end': 线段结束, 'cross': 岔路口
         :return: 巡线结束返回True, 异常返回False
         :rtype: bool
