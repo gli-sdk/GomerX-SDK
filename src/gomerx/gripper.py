@@ -1,34 +1,14 @@
+
 from . import module
-from . import protocol
-from . import action
-
-__all__ = ['Gripper']
-
-
-class GripperAction(action.Action):
-    _action_proto_cls = protocol.ProtoGripperCtrl
-
-    def __init__(self, angle, **kw):
-        super().__init__(**kw)
-        self._value = angle
-
-    def encode(self):
-        proto = protocol.ProtoGripperCtrl()
-        proto._value = self._value
-        return proto
+from . import client
+from . import message
+from . import event
+import time
 
 
 class Gripper(module.Module):
-    def __init__(self, robot):
-        super().__init__(robot)
-        self._action_dispatcher = robot.action_dispatcher
-
-    def _set_angle(self, angle, wait_for_complete=True):
-        action = GripperAction(angle)
-        self._action_dispatcher.send_action(action)
-        if wait_for_complete:
-            return action.wait_for_completed()
-        return True
+    def __init__(self, client: client.Client):
+        super().__init__(client)
 
     def open(self, wait_for_complete=True) -> bool:
         """控制机械手打开
@@ -38,7 +18,16 @@ class Gripper(module.Module):
         :return: 机械手打开为 True, 否则为 False
         :rtype: bool
         """
-        return self._set_angle(0, wait_for_complete)
+        msg = message.Message(message.Gripper, [0])
+        self.send_msg(msg)
+        if wait_for_complete:
+            event.Dispatcher().send(msg)
+            gripper_result = 100
+            while gripper_result == 100:
+                time.sleep(0.1)
+                gripper_result = event.Dispatcher().get_msg(message.Gripper).result
+            return (gripper_result == 102)
+        return True
 
     def close(self, wait_for_complete=True) -> bool:
         """控制机械手关闭
@@ -47,7 +36,16 @@ class Gripper(module.Module):
         :return: 机械手关闭为 True, 否则为 False
         :rtype: bool
         """
-        return self._set_angle(100, wait_for_complete)
+        msg = message.Message(message.Gripper, [1])
+        self.send_msg(msg)
+        if wait_for_complete:
+            event.Dispatcher().send(msg)
+            gripper_result = 100
+            while gripper_result == 100:
+                time.sleep(0.1)
+                gripper_result = event.Dispatcher().get_msg(message.Gripper).result
+            return (gripper_result == 102)
+        return True
 
     def get_status(self) -> int:
         """获取机械手张开状态
@@ -55,15 +53,4 @@ class Gripper(module.Module):
         :return: 0:完全张开, 1:完全闭合, 2:中间状态
         :rtype: int
         """
-        proto = protocol.ProtoGripperStatus()
-        msg = protocol.Message(proto)
-        try:
-            resp_msg = self._client.send_sync_msg(msg)
-            if resp_msg:
-                proto = resp_msg.get_proto()
-                status = proto._status
-                return status
-            else:
-                return False
-        except Exception as e:
-            return False
+        pass

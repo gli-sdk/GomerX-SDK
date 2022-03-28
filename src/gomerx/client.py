@@ -1,208 +1,267 @@
+
+from ctypes import *
+from queue import Empty, Full, Queue
+import socket
 import threading
-from . import connection
-from . import protocol
-from . import logger
-from . import event
 import time
+from . import event
+from . import message
+from . import netutil
 
-CLIENT_MAX_EVENT_NUM = 16
-
-
-class EventIdentify(object):
-    def __init__(self):
-        self._valid = False
-        self._ident = None
-        self._event = threading.Event()
-
-
-class MsgHandler(object):
-    def __init__(self, proto_data=None, req_cb=None, ack_cb=None):
-        self._proto_data = proto_data
-        self._req_cb = req_cb
-        self._ack_cb = ack_cb
-
-    @property
-    def proto_data(self):
-        return self._proto_data
-
-    @staticmethod
-    def make_dict_key(msg: protocol.Message):
-        return msg._seq_id
+import cv2
+from .exceptions import RobotConnectFailed, RobotNotSearched
 
 
 class Client(object):
-    def __init__(self, conn=None, name=None):
-        self._has_sent = 0
-        self._has_recv = 0
-        self._unpack_failed = 0
-        self._running = False
-        self._thread = None
-        self._wait_ack_list = {}
-        self._handler_dict = {}
-        self._dispatcher = event.Dispatcher()
-        self._wait_ack_mutex = threading.Lock()
-        self._conn = conn
-        if self._conn is None:
-            self._conn = connection.Connection()
-        self._name = name
-        self._video_enable = False
-        self._event_list = []
-        for i in range(0, CLIENT_MAX_EVENT_NUM):
-            ident = EventIdentify()
-            self._event_list.append(ident)
+    # 唯一客户端
 
-    def __del__(self):
-        self.stop()
+    AP = 'ap'
+    Router = 'router'
+    SearchPort = 20000
+    TCPPort = 9009
+    FilePort = 17000
+    VideoPort = 16016
+
+    BufSize = 1400
+
+    isConnected = False
+    isHealthy = False
+    # 客户端状态
+
+    tcpSendQueue = Queue()
+    tcpRecvQueue = Queue()
+    _instance_lock = threading.Lock()
+
+    def __init__(self, robot: str, mode=AP) -> None:
+        self.searchSocket = None
+        self.mode = mode
+        self.robot = robot
+        self.battery = 0
+        self.version = '0.0.0'
+
+        self.halfMessage = ''
+
+        self.currentHeartbeat = 0
+        self.lastHeartbeatResponseTime = 0
+
+        self.tcpSocket = None
+        self.fileSocket = None
+
+        self.ip = netutil.getIP(self.mode)
+        self.broadcastIP = netutil.getBroadcastIP(self.ip)
+
+        self.search()
+        self.connect()
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(Client, "_instance"):
+            with Client._instance_lock:
+                if not hasattr(Client, "_instance"):
+                    Client._instance = object.__new__(cls)
+        return Client._instance
 
     @staticmethod
-    def _make_ack_identify(msg: protocol.Message):
-        if msg._is_ack:
-            pass
-        else:
-            pass
-        return str(msg._seq_id)
-
-    def _ack_register_identify(self, msg: protocol.Message):
-        self._wait_ack_mutex.acquire()
-        ident = self._make_ack_identify(msg)
-        self._wait_ack_list[ident] = 1
-        self._wait_ack_mutex.release()
-        evt = None
-        for i, evt_ident in enumerate(self._event_list):
-            if not evt_ident._valid:
-                evt = evt_ident
-                break
-        if evt is None:
-            logger.error("[Client] event list is run out")
-            return None
-        evt._valid = True
-        evt._ident = ident
-        evt._event.clear()
-        return evt
-
-    def _ack_unregister_identify(self, identify):
+    def send(m: message.Message) -> bool:
+        if not Client.isConnected:
+            return False
         try:
-            self._wait_ack_mutex.acquire()
-            if identify in self._wait_ack_list.keys():
-                return self._wait_ack_list.pop(identify)
-            else:
-                logger.warning(
-                    "[Client] cannot find ident {} in wait_ack_list".format(identify))
-                return None
-        finally:
-            self._wait_ack_mutex.release()
+            Client.tcpSendQueue.put_nowait(m)
+        except Full:
+            return False
+        return True
 
-    def _recv_task(self):
-        self._running = True
-        while self._running:
-            msg = self._conn.recv()
-            if not self._running:
-                break
-            if msg is None:
-                time.sleep(0.5)
+    def searchSend(self):
+        # 每0.2s 发送一次消息，共发送3次
+        for i in range(3):
+            mess = message.Message(message.SearchDevice)
+            self.searchSocket.sendto(
+                mess.toString().encode(), (self.broadcastIP, Client.SearchPort))
+            time.sleep(0.2)
+
+    def search(self):
+        # 搜索机器人
+        self.searchSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+        self.searchSocket.settimeout(2)
+        searchSendThread = threading.Thread(
+            target=self.searchSend, name='searchSendThread')
+        searchSendThread.start()
+
+        start = time.time()
+        searched = False
+        while (not searched) and (time.time() - start < 2):
+            time.sleep(0.1)
+            data, addr = self.searchSocket.recvfrom(Client.BufSize)
+            msg = message.Message(message=data.decode())
+            if (msg.device.name == self.robot):
+                searched = True
+                self.serverIP = addr[0]
+        print('search done ', self.serverIP)
+
+        if not searched:
+            raise RobotNotSearched()
+
+    def connect(self):
+        # 连接
+        mess = message.Message(message.Connect)
+        self.searchSocket.sendto(
+            mess.toString().encode(), (self.serverIP, Client.SearchPort))
+
+        connected = False
+        start = time.time()
+
+        while(time.time() - start < 1.5) and (not connected):
+            data, addr = self.searchSocket.recvfrom(Client.BufSize)
+            r = message.Message(message=data.decode())
+            if r.isTypeOf(message.Connect):
+                connected = True
+                self.battery = r.device.battery
+                self.version = r.device.version
+            time.sleep(0.05)
+        if not connected:
+            raise RobotConnectFailed
+
+        self.tcpSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        self.tcpSocket.connect((self.serverIP, Client.TCPPort))
+
+        Client.isConnected = True
+        Client.isHealthy = True
+
+        # 启动收发线程
+        self.lastMsgTime = time.time()
+        self.lastHeartbeatTime = time.time()
+
+        tcpRecvThread = threading.Thread(
+            target=self.tcpRecv, name='tcpRecvThread')
+        tcpRecvThread.setDaemon(True)
+        tcpRecvThread.start()
+        tcpSendThread = threading.Thread(
+            target=self.tcpSend, name='tcpSendThread')
+        tcpSendThread.setDaemon(True)
+        tcpSendThread.start()
+
+        heartbeatThread = threading.Thread(
+            target=self.heartbeat, name='heartbeatThread')
+        heartbeatThread.setDaemon(True)
+        heartbeatThread.start()
+
+    def tcpSend(self):
+        # tcp 发送线程
+        while not netutil.isClosed(self.tcpSocket):
+            try:
+                m = self.tcpSendQueue.get_nowait()
+                data = m.toString() + '\n'
+                self.tcpSocket.send(data.encode())
+            except Empty:
                 continue
-            self._has_recv += 1
-            self._dispatch_to_send_sync(msg)
-            self._dispatch_to_callback(msg)
-            if self._dispatcher:
-                self._dispatcher.dispatch(msg)
+            time.sleep(0.05)
+        self.tcpSocket.close()
 
-        self._running = False
+    def tcpRecv(self):
+        # tcp 接收线程
+        while not netutil.isClosed(self.tcpSocket):
+            data = self.tcpSocket.recv(Client.BufSize)
+            self.unPack(data.decode())
+        self.tcpSocket.close()
 
-    def _dispatch_to_send_sync(self, msg: protocol.Message):
-        if msg._is_ack:
-            ident = self._make_ack_identify(msg)
-            self._wait_ack_mutex.acquire()
-            if ident in self._wait_ack_list.keys():
-                for i, evt in enumerate(self._event_list):
-                    if evt._ident == ident and evt._valid:
-                        self._wait_ack_list[ident] = msg
-                        evt._event.set()
+    def unPack(self, data):
+        # 解包TCP消息
+        end = False
+        while not end:
+            position = data.find('\n')
+            if (position == -1):
+                self.halfMessage += data
+                end = True
+            elif position == len(data) - 1:
+                m = self.halfMessage + data[:-1]
+                self.handleMessage(m)
+                self.halfMessage = ''
+                end = True
             else:
-                pass
-                # print("not in keys: ", self._wait_ack_list.keys())
-            self._wait_ack_mutex.release()
+                m = self.halfMessage + data[:position]
+                self.handleMessage(m)
+                self.halfMessage = ''
+                data = data[position+1:]
 
-    def _dispatch_to_callback(self, msg):
-        key = MsgHandler.make_dict_key(msg)
-        if msg._is_ack:
-            if key in self._handler_dict.keys():
-                self._handler_dict[key]._ack_cb(self, msg)
+    def handleMessage(self, m):
+        # 处理消息
+        msg = message.Message(message=m)
+        if msg.isTypeOf(message.Heartbeat):
+            self.checkHeartbeatResponse()
         else:
-            if key in self._handler_dict.keys():
-                self._handler_dict[key]._req_cb(self, msg)
+            self.lastMsgTime = time.time()
+            if msg.result != 100:
+                event.Dispatcher().recv(msg)
 
-    def add_handler(self, obj, name, f):
-        self._dispatcher.add_handler(obj, name, f)
+    def checkHeartbeatResponse(self):
+        self.lastHeartbeatTime = time.time()
+        self.currentHeartbeat = 0
+        gap = self.lastHeartbeatTime - self.heartbeatStart
 
-    def start(self):
-        result = self._conn.connect(self._name)
-        if result:
-            self._thread = threading.Thread(target=self._recv_task)
-            self._thread.setDaemon(True)
-            self._thread.start()
-        else:
-            logger.error('[Client] Start failed!')
+        if Client.isConnected and (not Client.isHealthy) and gap < 1 and self.lastHeartbeatResponseTime < 1:
+            Client.isHealthy = True
+        self.lastHeartbeatResponseTime = gap
 
-    def stop(self):
-        if self._thread is not None and self._thread.is_alive():
-            self._running = False
-            # self._thread.join()
-        if self._conn:
-            self._conn.destroy()
+    def heartbeat(self):
+        # 心跳
+        self.sendHeartbeat()
+        while not netutil.isClosed(self.tcpSocket):
+            now = time.time()
+            msgGap = now - self.lastMsgTime
+            beatGap = now - self.lastHeartbeatTime
 
-    def send(self, data: str):
-        self._conn.send_msg(data)
+            if beatGap > 115:
+                self.disconnect()
+            elif beatGap > 6:
+                Client.isHealthy = False
+            elif beatGap > 4:
+                self.sendHeartbeat()
+            elif beatGap > 3 and msgGap > 2:
+                self.sendHeartbeat()
+            time.sleep(0.05)
 
-    def send_msg(self, msg: protocol.Message):
-        data = msg.pack()
-        self._has_sent += 1
-        self.send(data)
+    def sendHeartbeat(self):
+        # 发送心跳
+        if (self.currentHeartbeat != 0):
+            return
+        m = message.Message(type=message.Heartbeat)
+        Client.send(m)
 
-    def resp_msg(self, msg):
-        pass
+        self.currentHeartbeat = m.seq
+        self.heartbeatStart = time.time()
 
-    def send_sync_msg(self, msg: protocol.Message, callback=None, timeout=3):
-        if not self._running:
-            logger.error("[Client] send_sync_msg, rect_task is not running")
-            return None
-        if msg._need_ack > 0:
-            evt = self._ack_register_identify(msg)
-            if evt is None:
-                logger.error("[Client] send_sync_msg, ack_register failed")
-                return None
-            self.send_msg(msg)
-            evt._event.wait(timeout)
-            if not evt._event.is_set():
-                logger.error("[Client] send_sync_msg, evt not set, timeout")
-                evt._valid = False
-                return None
-            resp_msg = self._ack_unregister_identify(evt._ident)
-            evt._valid = False
-            if resp_msg is None:
-                logger.error("[Client] send_sync_msg, get resp msg failed.")
-            else:
-                if isinstance(resp_msg, protocol.Message):
-                    try:
-                        resp_msg.unpack_protocol()
-                        if callback:
-                            callback(resp_msg)
-                    except Exception as e:
-                        self._unpack_failed += 1
-                        logger.warn("[Client] send_sync_msg, unpack failed")
-                        return None
-                else:
-                    logger.warn(
-                        "[Client] send_sync_msg, resp_msg instance error")
-                    return None
+    def disconnect(self):
+        # 断开连接并清空状态
+        print('disconnect')
 
-            return resp_msg
-        else:
-            print("else send msg")
-            self.send_msg(msg)
+        if Client.isConnected:
+            Client.send(message.Message(type=message.Disconnect))
+            time.sleep(0.5)
+            Client.isConnected = False
+            Client.isHealthy = False
 
-    def send_async_msg(self, msg: protocol.Message):
-        if not self._running:
-            return None
-        msg._need_ack = 0
-        return self.send_msg(msg)
+        if self.tcpSocket is not None:
+            self.tcpSocket.close()
+        if self.fileSocket is not None:
+            self.fileSocket.close()
+
+        time.sleep(0.5)
+
+        Client.tcpSendQueue.queue.clear()
+        Client.tcpRecvQueue.queue.clear()
+
+    def connectFile(self):
+        # 连接文件socket
+        if self.fileSocket is None:
+            self.fileSocket = socket.socket(
+                socket.AF_INET, socket.SOCK_STREAM, 0)
+            self.fileSocket.settimeout(2)
+            self.fileSocket.connect((self.serverIP, Client.FilePort))
+
+    def receiveFile(self, path, size):
+        # 接收文件
+        self.connectFile()
+        with open(path, 'wb') as f:
+            while((size > 0)):
+                data, addr = self.fileSocket.recv(Client.BufSize)
+                size -= len(data)
+                f.write(data)

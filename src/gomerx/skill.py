@@ -1,160 +1,14 @@
-from . import action
-from . import protocol
+import time
 from . import module
-import re
+from . import message
+from . import event
 
-
-class PatternDetAction(action.Action):
-    _action_proto_cls = protocol.ProtoPatternDet
-
-    def __init__(self, id, timeout, **kw):
-        super().__init__(**kw)
-        self._id = id
-        self._timeout = timeout
-
-    def encode(self):
-        proto = protocol.ProtoPatternDet()
-        proto._id = self._id
-        proto._timeout = self._timeout
-        return proto
-
-
-class FaceDetAction(action.Action):
-    _action_proto_cls = protocol.ProtoFaceDet
-
-    def __init__(self, _id, timeout, **kw):
-        super().__init__(**kw)
-        self._id = -1
-        self._timeout = timeout
-
-    def encode(self):
-        proto = protocol.ProtoFaceDet()
-        proto._id = self._id
-        proto._timeout = self._timeout
-        return proto
-
-class FaceSaveAction(action.Action):
-    _action_proto_cls = protocol.ProtoFaceSave
-
-    def __init__(self, name:str, **kw):
-        super().__init__(**kw)
-        self._name = name
-    
-    def encode(self):
-        proto = protocol.ProtoFaceSave()
-        proto._name = self._name
-        return proto
-
-class FaceDeleteAction(action.Action):
-    _action_proto_cls = protocol.ProtoFaceDel
-    def __init__(self, name:str, **kw):
-        super().__init__(**kw)
-        self._name = name
-    def encode(self):
-        proto = protocol.ProtoFaceDel()
-        proto._name = self._name
-        return proto
-
-class FaceListAction(action.Action):
-    _action_proto_cls = protocol.ProtoFaceList
-
-    def __init__(self, **kw):
-        super().__init__(**kw)
-    def encode(self):
-        proto = protocol.ProtoFaceList()
-        return proto
-
-class FaceRecAction(action.Action):
-    _action_proto_cls = protocol.ProtoFaceRec
-
-    def __init__(self, **kw):
-        super().__init__(**kw)
-    def encode(self):
-        proto = protocol.ProtoFaceRec()
-        return proto
-
-class ColorDetAction(action.Action):
-    _action_proto_cls = protocol.ProtoColorDet
-
-    def __init__(self, hsv_low, hsv_high, timeout, **kw):
-        super().__init__(**kw)
-        self._hsv_low = hsv_low
-        self._hsv_high = hsv_high
-        self._timeout = timeout
-
-    def encode(self):
-        proto = protocol.ProtoColorDet()
-        proto._hsv_low = self._hsv_low
-        proto._hsv_high = self._hsv_high
-        proto._timeout = self._timeout
-        return proto
-
-
-class LineDetAction(action.Action):
-    _action_proto_cls = protocol.ProtoLineDet
-
-    def __init__(self, hsv_low, hsv_high, timeout, **kw):
-        super().__init__(**kw)
-        self._hsv_low = hsv_low
-        self._hsv_high = hsv_high
-        self._timeout = timeout
-
-    def encode(self):
-        proto = protocol.ProtoLineDet()
-        proto._hsv_low = self._hsv_low
-        proto._hsv_high = self._hsv_high
-        proto._timeout = self._timeout
-        return proto
-
-
-class QrCodeDetAction(action.Action):
-    _action_proto_cls = protocol.ProtoQrCodeDet
-
-    def __init__(self, timeout, **kw):
-        super().__init__(**kw)
-        self._timeout = timeout
-
-    def encode(self):
-        proto = protocol.ProtoQrCodeDet()
-        proto._timeout = self._timeout
-        return proto
-
-
-class PatternTrackAction(action.Action):
-    _action_proto_cls = protocol.ProtoPatternTrack
-
-    def __init__(self, id, x, y, **kw):
-        super().__init__(**kw)
-        self._id = id
-        self._x = x
-        self._y = y
-
-    def encode(self):
-        proto = protocol.ProtoPatternTrack()
-        proto._id = self._id
-        proto._x = self._x
-        proto._y = self._y
-        return proto
-
-
-class LineTrackAction(action.Action):
-    _action_proto_cls = protocol.ProtoLineTrack
-
-    def __init__(self, id, **kw):
-        super().__init__(**kw)
-        self._id = id
-
-    def encode(self):
-        proto = protocol.ProtoLineTrack()
-        proto._id = self._id
-        return proto
+LINE_END = 'end'
+LINE_CROSS = 'cross'
+ROAD_TYPE = {'end': 0, 'cross': 1}
 
 
 class Skill(module.Module):
-    def __init__(self, robot):
-        super().__init__(robot)
-        self._action_dispatcher = robot.action_dispatcher
-        self._auto_timer = None
 
     @staticmethod
     def _hsv_in_cv(hsv=(0, 0, 0)):
@@ -162,171 +16,227 @@ class Skill(module.Module):
         s = round(hsv[1] * 2.55)
         v = round(hsv[2] * 2.55)
         return (h, s, v)
+    PATTERN_STR = ('0', '1', '2', '3', '4', '5', '6',
+                   '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z')
 
-    def detect_face(self, timeout=1):
+    def detect_face(self, timeout: int = 1) -> tuple:
         """ 检测人脸
 
-        :param int timeout: 超时时间，单位 s
-        :return: 检测到人脸返回True，未检测到返回False
+        :param int timeout: 超时时间, 单位 s
+        :return: result (bool) - 检测到人脸返回True, 未检测到返回False  \n
+                 data (list) - result为True时, 返回最大人脸中心坐标及宽高[x, y, w, h]
+        :rtype: tuple
         """
-        action = FaceDetAction(-1, timeout)
-        self._action_dispatcher.send_action(action)
-        return action.wait_for_completed()
+        if timeout < 1:
+            raise Exception("timeout value error")
+        msg = message.Message(
+            message.DetFace, [timeout])
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        detface_result = 100
+        while detface_result == 100:
+            time.sleep(0.1)
+            detface_result = event.Dispatcher().get_msg(message.DetFace).result
+        if detface_result == 102:
+            face_result = event.Dispatcher().get_msg(message.DetFace).dataint
+            print(face_result)
+            return True, face_result
+        else:
+            return False, []
 
-    def recognize_face(self):
+    def recognize_face(self) -> tuple:
         """ 识别检测到的人脸身份
-        
-        :return：result (bool) - 识别出人脸身份为True，未识别出为False
+
+        :return: result (bool) - 识别出人脸身份为True, 未识别出为False \n
                  name (str) - 人脸姓名
+        :rtype: tuple
         """
-        action = FaceRecAction()
-        self._action_dispatcher.send_action(action)
-        result = action.wait_for_completed()
-        name = action._data
-        return result, name
-    
-    def save_face(self, name: str):
+        return False, ''
+
+    def save_face(self, name: str) -> bool:
         """ 录入人脸
 
         :param str name: 待录入人脸的姓名
-        :return: 录入成功返回True，失败返回False
+        :return: 录入成功返回True, 失败返回False
+        :rtype: bool
         """
-        action = FaceSaveAction(name)
-        self._action_dispatcher.send_action(action)
-        return action.wait_for_completed()
+        return False
 
-    def delete_face(self, name: str):
+    def delete_face(self, name: str) -> bool:
         """ 删除人脸
-        
-        :param str name: 待删除人脸的姓名
-        :return: 删除成功返回True，失败返回False
-        """
-        action = FaceDeleteAction(name)
-        self._action_dispatcher.send_action(action)
-        return action.wait_for_completed()
 
-    def get_face_list(self):
+        :param str name: 待删除人脸的姓名
+        :return: 删除成功返回True, 失败返回False
+        :rtype: bool
+        """
+        return False
+
+    def get_face_list(self) -> tuple:
         """ 获取已保存的人脸列表
 
-        :param list face_list
-        :return: result (bool) - 获取成功返回True，失败返回False
+        :param list: face_list
+        :return: result (bool) - 获取成功返回True, 失败返回False \n
                  data (list) - 包含人脸编号和姓名的列表
+        :rtype: tuple
         """
-        result = False
-        data = []
-        action = FaceListAction()
-        self._action_dispatcher.send_action(action)
-        result = action.wait_for_completed()
-        if (action._data is not None):
-            data = re.split(r'[;s]s*', action._data)
-            if (data[-1] == ''):
-                data.pop()
-        return result, data
+        return False, []
 
-    def detect_pattern(self, id='A', timeout=1):
+    def detect_pattern(self, id: str = 'A', timeout: int = 1) -> bool:
         """ 检测图案
 
-        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int timeout: 超时时间，单位 s
-        :return: 检测到指定图案返回True，未检测到返回False
+        :param str id: 图案名称, 支持'A'~'Z', '0'~'9'
+        :param int timeout: 超时时间, 单位 s
+        :return: 检测到指定图案返回True, 未检测到返回False
+        :rtype: bool
         """
-        if not id.isupper() and not id.isdigit():
-            raise Exception('invalid parameter')
-        action = PatternDetAction(id, timeout)
-        self._action_dispatcher.send_action(action)
-        return action.wait_for_completed()
+        if id not in Skill.PATTERN_STR:
+            raise Exception("id value error")
+        if timeout < 1:
+            raise Exception("timeout value error")
+        msg = message.Message(
+            message.DetPattern, [timeout], id)
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        detpattern_result = 100
+        while detpattern_result == 100:
+            time.sleep(0.1)
+            detpattern_result = event.Dispatcher().get_msg(message.DetPattern).result
+        return (detpattern_result == 102)
 
-    def detect_qrcode(self, timeout=1):
+    def detect_qrcode(self, timeout: int = 1) -> tuple:
         """ 检测二维码
 
-        :param int timeout: 超时时间，单位 s
-        :return: result (bool) - 检测到二维码返回True，未检测到返回False \n
-                 data (str) - result为True时，返回二维码字符串信息
+        :param int timeout: 超时时间, 单位 s
+        :return: result (bool) - 检测到二维码返回True, 未检测到返回False \n
+                 data (str) - result为True时, 返回二维码字符串信息
+        :rtype: tuple
         """
-        action = QrCodeDetAction(timeout)
-        self._action_dispatcher.send_action(action)
-        result = action.wait_for_completed()
-        data = action._data
-        return result, data
+        if timeout < 1:
+            raise Exception("timeout value error")
+        msg = message.Message(
+            message.DetQrCode, [timeout])
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        detect_result = 100
+        while detect_result == 100:
+            time.sleep(0.1)
+            detect_result = event.Dispatcher().get_msg(message.DetQrCode).result
+        if detect_result == 102:
+            qrcode_result = event.Dispatcher().get_msg(message.DetQrCode).datastr
+            print(qrcode_result)
+            return True, qrcode_result
+        else:
+            return False, ''
 
-    def move_to_pattern(self, id='A', x=0, y=13):
+    def move_to_pattern(self, id: str = 'A', x: int = 0, y: int = 13) -> bool:
         """ 移动至图案前指定位置
 
-        :param str id: 图案名称，支持'A'~'Z', '0'~'9'
-        :param int x: 停止时，图案中心线与机器人中心线左右距离, 范围[-30, 30], 图案在机器人右侧为正，单位cm
-        :param int y: 停止时，图案处于机器人摄像头平面前方距离, 范围[13, 60], 单位cm
-        :return: 成功移动到图案前指定位置返回True，失败返回False
+        :param str id: 图案名称, 支持'A'~'Z', '0'~'9'
+        :param int x: 停止时, 图案中心线与机器人中心线左右距离, 范围[-0.4 * y ~ 0.4 * y], 图案在机器人右侧为正, 单位cm
+        :param int y: 停止时, 图案处于机器人摄像头平面前方距离, 范围[13 ~ 60], 单位cm
+        :return: 成功移动到图案前指定位置返回True, 失败返回False
+        :rtype: bool
         """
+        if y < 13 or y > 60 or x > abs(round(0.4 * y)):
+            raise Exception("x , y value error")
+        if id not in Skill.PATTERN_STR:
+            raise Exception("id value error")
+        msg = message.Message(
+            message.Move2Pattern, [x, y], id)
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        detpattern_result = 100
+        while detpattern_result == 100:
+            time.sleep(0.1)
+            detpattern_result = event.Dispatcher().get_msg(message.Move2Pattern).result
+        return (detpattern_result == 102)
 
-        if not id.isupper() and not id.isdigit():
-            raise Exception('invalid parameter')
-        if not(-30 <= x <= 30) or not(13 <= y <= 60):
-            raise Exception('invalid parameter')
-        action = PatternTrackAction(id, x, y)
-        self._action_dispatcher.send_action(action)
-        return action.wait_for_completed(timeout=30)
-
-    def detect_color_blob(self, hsv_low=(0, 0, 0), hsv_high=(360, 100, 100), timeout=1):
+    def detect_color_blob(self, hsv_low: tuple = (0, 0, 0), hsv_high: tuple = (360, 100, 100), timeout: int = 1) -> tuple:
         """ 检测色块
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timeout: 超时时间，单位 s
-        :return: result (bool) - 检测到色块返回True，未检测到返回False \n
-                 data (list) - result为True时，返回色块中心坐标及宽高[x, y, w, h]
+        :param int timeout: 超时时间, 单位 s
+        :return: result (bool) - 检测到色块返回True, 未检测到返回False \n
+                 data (list) - result为True时, 返回色块中心坐标及宽高[x, y, w, h]
+        :rtype: tuple
         """
+        if hsv_low[0] > hsv_high[0] or hsv_low[1] > hsv_high[1] or hsv_low[2] > hsv_high[2]:
+            raise Exception("hsv value error")
+        if min(hsv_low) < 0 or max(hsv_high) > 360:
+            raise Exception("hsv value error")
+        if hsv_high[1] > 100 or hsv_high[2] > 100:
+            raise Exception("hsv value error")
+        if timeout < 1:
+            raise Exception("timeout value error")
+        opencv_hsv_low = Skill._hsv_in_cv(hsv_low)
+        opencv_hsv_high = Skill._hsv_in_cv(hsv_high)
+        msg = message.Message(
+            message.DetColor, [timeout, opencv_hsv_low[0], opencv_hsv_high[0], opencv_hsv_low[1], opencv_hsv_high[1], opencv_hsv_low[2], opencv_hsv_high[2]])
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        detline_result = 100
+        while detline_result == 100:
+            time.sleep(0.1)
+            detline_result = event.Dispatcher().get_msg(message.DetColor).result
+        if detline_result == 102:
+            color_coordinate = event.Dispatcher().get_msg(message.DetColor).dataint
+            return True, color_coordinate
+        else:
+            return False, []
 
-        if not(0 <= hsv_low[0] <= 360) or not(0 <= hsv_low[1] <= 100) or not(0 <= hsv_low[2] <= 100) \
-                or not(0 <= hsv_high[0] <= 360) or not(0 <= hsv_high[1] <= 100) \
-                or not(0 <= hsv_high[2] <= 100) or not(timeout >= 0):
-            raise Exception('invalid parameter')
-        _hsv_low = self.__class__._hsv_in_cv(hsv_low)
-        _hsv_high = self.__class__._hsv_in_cv(hsv_high)
-
-        action = ColorDetAction(_hsv_low, _hsv_high, timeout)
-        self._action_dispatcher.send_action(action)
-        result = action.wait_for_completed()
-        data = action._data
-        if data is not None:
-            data[0] = int(data[0] / 2)
-            data[1] = int(data[1] / 2)
-            data[2] = int(data[2] / 2)
-            data[3] = int(data[3] / 2)
-        return result, data
-
-    def detect_line(self, hsv_low=(0, 0, 0), hsv_high=(360, 100, 100), timeout=1):
+    def detect_line(self, hsv_low: tuple = (0, 0, 0), hsv_high: tuple = (360, 100, 100), timeout: int = 1) -> tuple:
         """ 检测线段
 
         :param tuple hsv_low: hsv颜色下边界
         :param tuple hsv_high: hsv颜色上边界
-        :param int timeout: 超时时间，单位 s
-        :return: result (bool) - 检测到线段返回True，未检测到返回False \n
-                 data (list) - result为True时，返回线段起点和终点坐标[x0, y0, x1, y1]
+        :param int timeout: 超时时间, 单位 s
+        :return: result (bool) - 检测到线段返回True, 未检测到返回False \n
+                 data (list) - result为True时, 返回线段起点和终点坐标[x0, y0, x1, y1]
+        :rtype: tuple
         """
+        if hsv_low[0] > hsv_high[0] or hsv_low[1] > hsv_high[1] or hsv_low[2] > hsv_high[2]:
+            raise Exception("hsv value error")
+        if min(hsv_low) < 0 or max(hsv_high) > 360:
+            raise Exception("hsv value error")
+        if hsv_high[1] > 100 or hsv_high[2] > 100:
+            raise Exception("hsv value error")
+        if timeout < 1:
+            raise Exception("timeout value error")
+        opencv_hsv_low = Skill._hsv_in_cv(hsv_low)
+        opencv_hsv_high = Skill._hsv_in_cv(hsv_high)
+        msg = message.Message(
+            message.DetLine, [timeout, opencv_hsv_low[0], opencv_hsv_high[0], opencv_hsv_low[1], opencv_hsv_high[1], opencv_hsv_low[2], opencv_hsv_high[2]])
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        detline_result = 100
+        while detline_result == 100:
+            time.sleep(0.1)
+            detline_result = event.Dispatcher().get_msg(message.DetLine).result
+        if detline_result == 102:
+            coordinate = event.Dispatcher().get_msg(message.DetLine).dataint
+            return True, coordinate
+        else:
+            return False, []
 
-        if not(0 <= hsv_low[0] <= 360) or not(0 <= hsv_low[1] <= 100) or not(0 <= hsv_low[2] <= 100) \
-                or not(0 <= hsv_high[0] <= 360) or not(0 <= hsv_high[1] <= 100) \
-                or not(0 <= hsv_high[2] <= 100) or not(timeout >= 0):
-            raise Exception('invalid parameter')
-        _hsv_low = self.__class__._hsv_in_cv(hsv_low)
-        _hsv_high = self.__class__._hsv_in_cv(hsv_high)
+    def move_along_line(self, stop=LINE_END) -> bool:
+        """ 自动巡线直到线段消失, 使用前需先使用detect_line方法
 
-        action = LineDetAction(_hsv_low, _hsv_high, timeout)
-        self._action_dispatcher.send_action(action)
-        result = action.wait_for_completed()
-        data = action._data
-        if data is not None:
-            data[0] = int(data[0] / 2)
-            data[1] = int(data[1] / 2)
-            data[2] = int(data[2] / 2)
-            data[3] = int(data[3] / 2)
-        return result, data
-
-    def move_along_line(self):
-        """ 自动巡线直到线段消失，使用前需先使用detect_line方法
-
-        :return: 巡线结束返回True，异常返回False
+        :param stop: 停止条件, 'end': 线段结束, 'cross': 岔路口
+        :return: 巡线结束返回True, 异常返回False
+        :rtype: bool
         """
-        action = LineTrackAction(0)
-        self._action_dispatcher.send_action(action)
-        return action.wait_for_completed(timeout=60)
+        if stop not in ROAD_TYPE:
+            raise Exception(" ROAD_TYPE error")
+        msg = message.Message(
+            message.FollowLine, [ROAD_TYPE[stop]])
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        detline_result = event.Dispatcher().get_msg(message.FollowLine).result
+        while detline_result == 100:
+            time.sleep(0.1)
+            detline_result = event.Dispatcher().get_msg(message.FollowLine).result
+        if detline_result == 102:
+            return True
+        else:
+            return False

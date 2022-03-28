@@ -1,52 +1,56 @@
-from . import protocol
-from . import robot
-from . import action
 from . import module
-
-__all__ = ['Arm']
-
-
-class ArmAction(action.Action):
-    _action_proto_cls = protocol.ProtoArmControl
-
-    def __init__(self, x, y, **kw):
-        super().__init__(**kw)
-        self._x = x
-        self._y = y
-
-    def encode(self):
-        proto = protocol.ProtoArmControl()
-        proto._x = self._x
-        proto._y = self._y
-        return proto
+from . import message
+from . import event
+import time
 
 
 class Arm(module.Module):
-    def __init__(self, robot):
-        super().__init__(robot)
-        self._action_dispatcher = robot.action_dispatcher
 
-    def move_to(self, x=0, y=0, wait_for_complete=True):
+    def move_to(self, y: int = 0, z: int = 0, wait_for_complete=True) -> bool:
         """ 机械臂移动到绝对位置
 
-        :param int x: x轴坐标, 单位cm
-        :param int y: y轴坐标, 单位cm
+        :param int y: 机械手中心距离车体前平面距离, 单位cm
+        :param int z: 机械手中心距离地面高度, 单位cm
         :param bool wait_for_complete: 是否等待执行完成, 默认为 True
         :return: 机械臂是否移到绝对位置, 完成返回 True, 未完成返回 False
         :rtype: bool
         """
-        # TODO: 抛出InvalidParameter异常
-        action = ArmAction(x, y)
-        self._action_dispatcher.send_action(action)
+        if y < 10 or y > 20 or z < 3 or z > 21:
+            raise Exception(" y, z, value error")
+        msg = message.Message(message.ArmEndPos, [y, z])
+        event.Dispatcher().send(msg)
+        self.send_msg(msg)
         if wait_for_complete:
-            return action.wait_for_completed()
+            result = 100
+            while result == 100:
+                time.sleep(0.1)
+                result = event.Dispatcher().get_msg(str(message.ArmEndPos)).result
+            return (result == 102)
         return True
 
-    def recenter(self, wait_for_complete=True):
+    def recenter(self, wait_for_complete=True) -> bool:
         """机械臂回中
 
         :param bool wait_for_complete: 是否等待执行完成, 默认为 True
         :return: 机械臂回中是否完成, 完成返回 True, 否则返回 False
         :rtype: bool
         """
-        return self.move_to(12, 15, wait_for_complete)
+        return self.move_to(10, 13, wait_for_complete)
+
+    def calibrate(self, wait_for_complete=True) -> bool:
+        """机械臂标定
+
+        :param bool wait_for_complete: 是否等待执行完成, 默认为 True
+        :return: 机械臂标定是否完成, 完成返回 True, 否则返回 False
+        :rtype: bool
+        """
+        msg = message.Message(message.ArmCalib)
+        event.Dispatcher().send(msg)
+        self.send_msg(msg)
+        if wait_for_complete:
+            result = 100
+            while result == 100:
+                time.sleep(0.1)
+                result = event.Dispatcher().get_msg(str(message.ArmCalib)).result
+            return (result == 102)
+        return True

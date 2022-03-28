@@ -13,7 +13,3 @@ stream_handler = logging.StreamHandler()
 logger.addHandler(stream_handler)
 
 logger.info("***** Welcome to the world of GomerX. Just enjoy it! *****")
-
-
-__all__ = ['logger', 'protocol', 'config', 'version', 'action', 'connection', 'client',
-           'module', 'robot', 'chassis', 'gripper',  'camera', 'led', 'arm', 'skill']

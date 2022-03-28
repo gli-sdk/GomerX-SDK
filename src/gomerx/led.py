@@ -1,7 +1,7 @@
-from gomerx import protocol
+from . import event
 from . import module
+from . import message
 
-__all__ = ['Led', 'EFFECT_ON', 'EFFECT_OFF', 'EFFECT_FLASH', 'EFFECT_BREATH']
 
 EFFECT_ON = 'on'
 EFFECT_OFF = 'off'
@@ -10,29 +10,26 @@ EFFECT_BREATH = 'breath'
 
 
 class Led(module.Module):
-    def __init__(self, robot):
-        super().__init__(robot)
 
-    def set_led(self, color=(0, 0, 0), effect=EFFECT_ON, T=1000):
+    def set_led(self, color: tuple = (0, 0, 0), effect: str = EFFECT_ON, T: int = 1000) -> bool:
         """设置灯光颜色和显示模式
 
         :param tuple color: color=(R, G, B), 灯光颜色采用RGB模型组成. R:[0~255], 红色光分量, G:[0~255], 绿色光分量, B:[0~255], 蓝色光分量
         :param enum effect: "on":开启灯光, "off":关闭灯光, "flash":灯光闪烁, "breath":呼吸灯
+        :param int T: 设置灯光闪烁/呼吸的时间周期, 呼吸的时间范围为[500,2000], 闪烁的时间范围为[100,1000], 单位Ms;
         :return: 灯光设置是否成功, 设置成功返回 True, 设置失败返回 False
         :rtype: bool
         """
-        if not(0 <= color[0] <= 255) or not(0 <= color[1] <= 255) or not(0 <= color[2] <= 255):
-            raise Exception('invalid parameter.')
-        proto = protocol.ProtoSetLed(color)
-        if effect is EFFECT_OFF:
-            proto._effect = 0
-        elif effect is EFFECT_ON:
-            proto._effect = 1
-        elif effect is EFFECT_FLASH:
-            proto._effect = 2
-            proto._t = T
-        elif effect is EFFECT_BREATH:
-            proto._effect = 3
-            proto._t = T
-
-        return self._send_sync_proto(proto)
+        if min(color) < 0 or max(color) > 255:
+            raise Exception("color value error")
+        if effect == EFFECT_BREATH:
+            if T > 2000 or T < 500:
+                raise Exception("T value error")
+        elif effect == EFFECT_FLASH:
+            if T > 1000 or T < 100:
+                raise Exception("T value error")
+        msg = message.Message(
+            message.SetLed, [color[0], color[1], color[2], T], effect)
+        self.send_msg(msg)
+        event.Dispatcher().send(msg)
+        return True

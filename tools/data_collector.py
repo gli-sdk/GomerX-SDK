@@ -111,5 +111,5 @@ if __name__ == '__main__':
 
         if current_classes_num == max_classes_num:
             break
-
+    my_camera.stop_video_stream()
     cv.destroyAllWindows()
